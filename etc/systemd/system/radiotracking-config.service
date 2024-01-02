@@ -6,7 +6,7 @@ StartLimitIntervalSec=600
 StartLimitAction=reboot
 
 [Service]
-ExecStart=bash -c "/usr/bin/python3 -m radiotracking.config --config /boot/radiotracking.ini --station `hostname` --dashboard --dashboard-host localhost --dashboard-port 8050 --mqtt --mqtt-host localhost --mqtt-port 1883 --csv --export-config --path /data"
+ExecStart=bash -c "/usr/bin/python3 -m radiotracking.config --config /boot/firmware/radiotracking.ini --station `hostname` --dashboard --dashboard-host localhost --dashboard-port 8050 --mqtt --mqtt-host localhost --mqtt-port 1883 --csv --export-config --path /data"
 Restart=always
 RestartSec=10s
 

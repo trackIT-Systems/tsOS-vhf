@@ -1,5 +1,7 @@
-FROM "tRackIT-OS-armhf.img"
-TO "BatRack-OS.img"
+ARCH=armhf
+
+INCLUDE tRackIT-OS
+TO "BatRack-OS-${ARCH}.img"
 PUMP 500M
 
 # update sources for RPI_Cam_Web installer
@@ -42,6 +44,7 @@ RUN chown www-data:www-data /dev/shm/mjpeg
 RUN chmod 777 /dev/shm/mjpeg 
 
 # enable apache
+RUN bash
 RUN systemctl enable apache2
 
 # Enable services and add to sysdweb

@@ -9,7 +9,7 @@ StartLimitIntervalSec=900s
 StartLimitAction=reboot
 
 [Service]
-ExecStart=python3 -m batrack /boot/batrack.conf
+ExecStart=python3 -m batrack /boot/firmware/batrack.conf
 Restart=always
 RestartSec=60s
 User=pi
