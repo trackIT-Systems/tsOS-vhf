@@ -1,7 +1,7 @@
 # Set default ARCH
 : ${ARCH:=arm64}
 
-FROM "https://github.com/tRackIT-Systems/tsOS-Base/releases/download/2024.01.2/tsOS-Base-${ARCH}-2024.01.2.zip"
+FROM "https://github.com/tRackIT-Systems/tsOS-Base/releases/download/2024.02.3/tsOS-Base-${ARCH}-2024.02.3.zip"
 TO "tRackIT-OS-${ARCH}.img"
 PUMP 300M
 
@@ -21,6 +21,10 @@ RUN chown -R pi:pi /home/pi/
 
 # Blacklist DVB-T driver
 RUN tee -a /etc/modprobe.d/raspi-blacklist.conf <<<'blacklist dvb_usb_rtl28xxu'
+
+# Install radiotracking dependencies
+RUN apt-get install -y librtlsdr-dev
+RUN python3 -m pip install --break-system-packages dash
 
 # Install radiotracking
 RUN python3 -m pip install --break-system-packages -e /home/pi/pyradiotracking
