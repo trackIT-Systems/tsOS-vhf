@@ -1,9 +1,26 @@
 # Set default ARCH
 : ${ARCH:=arm64}
 
-FROM "https://github.com/tRackIT-Systems/tsOS-Base/releases/download/2024.05.1/tsOS-Base-${ARCH}-2024.05.1.zip"
+FROM "https://github.com/tRackIT-Systems/tsOS-Base/releases/download/2024.07.2/tsOS-Base-${ARCH}-2024.07.2.zip"
 TO "tRackIT-OS-${ARCH}.img"
 PUMP 300M
+
+# Set os-release info
+NAME="tRackIT-OS"
+VERSION_ID=`git describe --tags --always || true`
+VERSION_CODENAME=bookworm
+
+RUN tee /etc/os-release <<EOF
+PRETTY_NAME="$NAME $VERSION_ID ($VERSION_CODENAME)"
+NAME=$NAME
+VERSION_ID=$VERSION_ID
+VERSION="$VERSION_ID ($VERSION_CODENAME)"
+VERSION_CODENAME=bookworm
+ID=debian
+HOME_URL="https://trackit.systems/"
+SUPPORT_URL="https://github.com/trackIT-Systems/tRackIT-OS"
+BUG_REPORT_URL="https://github.com/trackIT-Systems/tRackIT-OS/issues"
+EOF
 
 # Install custom folders 
 INSTALL boot /boot
