@@ -1,9 +1,9 @@
 # Set default ARCH
 : ${ARCH:=arm64}
 
-FROM "https://github.com/tRackIT-Systems/tsOS-Base/releases/download/2024.07.2/tsOS-Base-${ARCH}-2024.07.2.zip"
+FROM "https://github.com/tRackIT-Systems/tsOS-Base/releases/download/2024.09.2/tsOS-Base-${ARCH}-2024.09.2.zip"
 TO "tRackIT-OS-${ARCH}.img"
-PUMP 300M
+PUMP 400M
 
 # Set os-release info
 NAME="tRackIT-OS"
@@ -39,8 +39,19 @@ RUN chown -R pi:pi /home/pi/
 # Blacklist DVB-T driver
 RUN tee -a /etc/modprobe.d/raspi-blacklist.conf <<<'blacklist dvb_usb_rtl28xxu'
 
+# Install rtlsdr build dependencies
+RUN apt update
+RUN apt-get install -y build-essential cmake
+
+WORKDIR /home/pi/librtlsdr
+RUN cmake . -DINSTALL_UDEV_RULES=ON
+RUN make -j4
+RUN make install
+RUN ldconfig
+
+RUN python3 -m pip install --break-system-packages -e /home/pi/pyrtlsdr
+
 # Install radiotracking dependencies
-RUN apt-get install -y librtlsdr-dev
 RUN python3 -m pip install --break-system-packages dash
 
 # Install radiotracking
@@ -52,3 +63,6 @@ RUN tee -a /etc/sysdweb.conf <<EOF
 title = RadioTracking | VHF Signal Detection
 unit = radiotracking
 EOF
+
+# Disable swap
+RUN systemctl disable dphys-swapfile.service

@@ -1,12 +1,10 @@
 services:
   pimod:
-    build: ./pimod
+    image: nature40/pimod:v0.6.1
     privileged: true
     tty: true
     volumes:
-      - .:/sensorboxes
-      - ./pimod:/pimod
-    working_dir: /sensorboxes
+      - .:/tRackIT-OS
+    working_dir: /tRackIT-OS
     environment:
-      - PATH:'$PATH:/pimod'
       - IMG

@@ -1,6 +1,3 @@
-[submodule "pimod"]
-	path = pimod
-	url = https://github.com/Nature40/pimod.git
 [submodule "home/pi/pyradiotracking"]
 	path = home/pi/pyradiotracking
 	url = https://github.com/tRackIT-Systems/pyradiotracking.git
@@ -13,3 +10,9 @@
 [submodule "home/pi/snd-i2s_rpi"]
 	path = home/pi/snd-i2s_rpi
 	url = https://github.com/tRackIT-Systems/snd-i2s_rpi.git
+[submodule "home/pi/librtlsdr"]
+	path = home/pi/librtlsdr
+	url = https://github.com/librtlsdr/librtlsdr.git
+[submodule "home/pi/pyrtlsdr"]
+	path = home/pi/pyrtlsdr
+	url = https://github.com/pyrtlsdr/pyrtlsdr.git
