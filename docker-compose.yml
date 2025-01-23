@@ -1,6 +1,6 @@
 services:
   pimod:
-    image: nature40/pimod:v0.6.1
+    image: nature40/pimod:v0.7.0
     privileged: true
     tty: true
     volumes:
