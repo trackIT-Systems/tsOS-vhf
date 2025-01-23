@@ -21,7 +21,7 @@ Fetching remote: https://github.com/trackIT-Systems/tsOS-Base/releases/download/
 
 ### Targets
 
-As of September 2024, two versions of tsOS-vhf exist, build for `armhf` and `arm64`. The reasoning behind that is, that some camera software requires 32-bit libraries, which in turn are required by BatRack. 
+As of September 2024, two versions of tsOS-vhf exist, build for `armhf` and `arm64`. The reasoning behind that is, that some camera software requires 32-bit libraries, which in turn have been required by BatRack. 
 
 `tsOS-vhf.Pifile` is using arm64 as their primary target. However there exist `-armhf` versions which create their 32-bit counterparts. 
 
