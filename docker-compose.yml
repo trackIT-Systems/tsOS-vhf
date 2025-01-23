@@ -4,7 +4,7 @@ services:
     privileged: true
     tty: true
     volumes:
-      - .:/tRackIT-OS
-    working_dir: /tRackIT-OS
+      - .:/tsOS-vhf
+    working_dir: /tsOS-vhf
     environment:
       - IMG

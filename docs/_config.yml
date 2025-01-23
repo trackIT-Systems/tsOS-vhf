@@ -1,14 +1,14 @@
-title: tRackIT-OS Manual
+title: tsOS-vhf Manual
 description: Open-source Software for Reliable VHF Wildlife Tracking
 show_downloads: false
 theme: jekyll-theme-cayman
 
 github:
   is_project_page: true
-  repository_url: https://github.com/tRackIT-Systems/trackit-os
-  repository_name: "tRackIT-OS"
+  repository_url: https://github.com/trackIT-Systems/tsOS-vhf
+  repository_name: "tsOS-vhf"
   owner_url: https://trackit.systems
-  owner_name: tRackIT Systems
+  owner_name: trackIT Systems
 
 # Build settings
 defaults:

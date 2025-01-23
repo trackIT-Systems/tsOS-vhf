@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
 import argparse
-import pathlib
-import logging
 import datetime
+import logging
+import pathlib
 import shutil
 
-parser = argparse.ArgumentParser(description="Relocate lost+found files of tRackIT OS to their original filenames")
-parser.add_argument('hostname', help="original hostname")
+parser = argparse.ArgumentParser(description="Relocate lost+found files of tsOS-vhf to their original filenames")
+parser.add_argument("hostname", help="original hostname")
 parser.add_argument("-o", "--outpath", help="path to copy files to", type=pathlib.Path, default=".")
 parser.add_argument("-i", "--inpath", help="path to find files in", type=pathlib.Path, default=".")
 parser.add_argument("-p", "--prefix", help="prefix of files to find", default="#")
-parser.add_argument('-v', "--verbose", action='store_true')
+parser.add_argument("-v", "--verbose", action="store_true")
 
 HEADERS = {
     "[optional arguments]": ".ini",
@@ -47,7 +47,7 @@ for path in args.inpath.glob(f"{args.prefix}*"):
         ext = HEADERS[head]
         logging.debug("Extension:           %s", ext)
     except KeyError:
-        logging.warning("No extension found for header \"%s\", skipping", head)
+        logging.warning('No extension found for header "%s", skipping', head)
         continue
 
     # build path

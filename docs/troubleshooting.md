@@ -7,8 +7,8 @@ In this section, common errors and problems are described and potential solution
 
 > Note: The solutions discussed in this section are not intended to be definitive, but should serve as a possible starting point for resolution.
 
-## The *tRackIT station* keeps on restarting.
-There are multiple reasons why *pyradiotracking* or the *tRackIT station* keeps on restarting, the underlying problems are:
+## The *trackIT station* keeps on restarting.
+There are multiple reasons why *pyradiotracking* or the *trackIT station* keeps on restarting, the underlying problems are:
 1. A bad USB connection of an SDR stick or the USB hub;
 2. A broken or failing SDR stick or
 3. High system load or high temperatures. 
@@ -75,7 +75,7 @@ PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
 ```
 The example above shows, that the network connection is not working correctly.
 
-You can further check if the LTE stick is recognized by *tRackIT OS* using `ip`:
+You can further check if the LTE stick is recognized by *tsOS-vhf* using `ip`:
 ```console
 pi@mof-rts-00015:~ $ ip addr show eth1
 4: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
@@ -94,7 +94,7 @@ If it is connected correctly and still not working, it might be, that the cellul
 Connect the cellular modem to a laptop and try to fix the connection issues specific to your used modem and cellular provider.
 
 ## The station appears to be running but is not accessible via WiFi or cellular network. 
-Unfortunately in some situations *tRackIT stations* hang up in a non-recoverable way.
+Unfortunately in some situations *trackIT stations* hang up in a non-recoverable way.
 The red and green lights of the Raspberry Pi might still be lit or even blinking and the WiFi SSID is still shown at your host.
 When trying to connect to the WiFi, no IP address is given and no connection can be made.
 Also access through the wireguard VPN is not possible.

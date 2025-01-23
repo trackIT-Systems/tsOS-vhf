@@ -1,15 +1,15 @@
 [submodule "home/pi/pyradiotracking"]
 	path = home/pi/pyradiotracking
-	url = https://github.com/tRackIT-Systems/pyradiotracking.git
+	url = https://github.com/trackIT-Systems/pyradiotracking.git
 [submodule "home/pi/pybatrack"]
 	path = home/pi/pybatrack
-	url = https://github.com/tRackIT-Systems/pybatrack
+	url = https://github.com/trackIT-Systems/pybatrack
 [submodule "home/pi/RPi_Cam_Web_Interface"]
 	path = home/pi/RPi_Cam_Web_Interface
 	url = https://github.com/silvanmelchior/RPi_Cam_Web_Interface.git
 [submodule "home/pi/snd-i2s_rpi"]
 	path = home/pi/snd-i2s_rpi
-	url = https://github.com/tRackIT-Systems/snd-i2s_rpi.git
+	url = https://github.com/trackIT-Systems/snd-i2s_rpi.git
 [submodule "home/pi/librtlsdr"]
 	path = home/pi/librtlsdr
 	url = https://github.com/librtlsdr/librtlsdr.git

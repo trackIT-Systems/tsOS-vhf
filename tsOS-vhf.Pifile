@@ -1,12 +1,12 @@
 # Set default ARCH
 : ${ARCH:=arm64}
 
-FROM "https://github.com/tRackIT-Systems/tsOS-Base/releases/download/2025.1.1/tsOS-Base-${ARCH}-2025.1.1.zip"
-TO "tRackIT-OS-${ARCH}.img"
+FROM "https://github.com/trackIT-Systems/tsOS-Base/releases/download/2025.1.1/tsOS-Base-${ARCH}-2025.1.1.zip"
+TO "tsOS-vhf-${ARCH}.img"
 PUMP 400M
 
 # Set os-release info
-NAME="tRackIT-OS"
+NAME="tsOS-vhf"
 VERSION_ID=`git describe --tags --always || true`
 VERSION_CODENAME=bookworm
 
@@ -18,8 +18,8 @@ VERSION="$VERSION_ID ($VERSION_CODENAME)"
 VERSION_CODENAME=bookworm
 ID=debian
 HOME_URL="https://trackit.systems/"
-SUPPORT_URL="https://github.com/trackIT-Systems/tRackIT-OS"
-BUG_REPORT_URL="https://github.com/trackIT-Systems/tRackIT-OS/issues"
+SUPPORT_URL="https://github.com/trackIT-Systems/tsOS-vhf"
+BUG_REPORT_URL="https://github.com/trackIT-Systems/tsOS-vhf/issues"
 EOF
 
 # Install custom folders 

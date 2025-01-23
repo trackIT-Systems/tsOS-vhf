@@ -4,11 +4,11 @@ menu: Operation
 
 # Operation
 
-The *tRackIT OS* consists of multiple components responsible for signal detection ([`pyradiotracking`](https://github.com/tRackIT-Systems/pyradiotracking)), configuration and maintenance ([`pymqttutil`](https://github.com/tRackIT-Systems/pymqttutil), [`systemd`](https://www.freedesktop.org/wiki/Software/systemd/), [`sysdweb`](https://github.com/ogarcia/sysdweb), `pyradiotracking-lora`) and communication ([`wireguard`](https://www.wireguard.com), [`mosquitto`](https://mosquitto.org), [`caddy`](https://caddyserver.com), `ssh`).
+The *tsOS-vhf* consists of multiple components responsible for signal detection ([`pyradiotracking`](https://github.com/trackIT-Systems/pyradiotracking)), configuration and maintenance ([`pymqttutil`](https://github.com/trackIT-Systems/pymqttutil), [`systemd`](https://www.freedesktop.org/wiki/Software/systemd/), [`sysdweb`](https://github.com/ogarcia/sysdweb), `pyradiotracking-lora`) and communication ([`wireguard`](https://www.wireguard.com), [`mosquitto`](https://mosquitto.org), [`caddy`](https://caddyserver.com), `ssh`).
 The services are interleaved and do rely on each other at multiple points.
 The goal of this page is to present the operating system configuration and make automatic error detection and correction more transparent.
 
-![Components of *tRackIT OS* visualized in a block diagram.](assets/tRackIT-OS-components.png)
+![Components of *tsOS-vhf* visualized in a block diagram.](assets/tsOS-vhf-components.png)
 
 ## Error Detection and Recovery
 
@@ -52,7 +52,7 @@ Rebooting the system also restarts the USB stack which can sometime help to miti
 > Note: When debugging errors or copying data from failed stations, the automatic rebooting can sometimes be annoying. You can always disable the `radiotracking` service using `sudo systemctl stop radiotracking`.
 
 ## Monitoring 
-There are different measuring instruments showing different aspects of a *tRackIT station's* health state.
+There are different measuring instruments showing different aspects of a *trackIT station's* health state.
 While all of the values are helpful in certain ways, some values can lead to wrong conclusions.
 
 ### `sysdweb` Color Indicator
