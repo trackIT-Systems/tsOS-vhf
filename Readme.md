@@ -1,5 +1,6 @@
 # tsOS-vhf
 [![Build tsOS-vhf Images](https://github.com/trackIT-Systems/tsOS-vhf/actions/workflows/build.yml/badge.svg)](https://github.com/trackIT-Systems/tsOS-vhf/actions/workflows/build.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/trackIT-Systems/tsOS-vhf)](https://github.com/trackIT-Systems/tsOS-vhf/releases/latest)
 
 tsOS-vhf is an open-source software for reliable VHF radio tracking of (small) animals in their wildlife habitat.tsOS-vhf is an operating system distribution for trackIT stations that receive signals emitted by VHF tags mounted on animals and are built from low-cost commodity-off-the-shelf hardware.tsOS-vhf provides software components for VHF signal processing, system monitoring, configuration management, and user access. In particular, it records, stores, analyzes, and transmits detected VHF signals and their descriptive features, e.g., to calculate bearings of signals emitted by VHF radio tags mounted on animals or to perform animal activity classification. 
 
