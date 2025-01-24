@@ -10,12 +10,12 @@ The image of tsOS-vhf can be downloaded in the [GitHub Releases](https://github.
 
 ## Build tsOS-vhf
 
-The base tsOS-vhf build consists of two stages. First, a base image is built, which installs all required software and might take some time to be build, see [https://github.com/trackIT-Systems/tsOS-Base](tsOS-Base). Secondly the custom software components and configuration files are copied and installed and `tsOS-vhf.img` is built. 
+The base tsOS-vhf build consists of two stages. First, a base image is built, which installs all required software and might take some time to be build, see [https://github.com/trackIT-Systems/tsOS-base](tsOS-base). Secondly the custom software components and configuration files are copied and installed and `tsOS-vhf.img` is built. 
 
 ```sh
 $ docker-compose run --rm pimod pimod.sh tsOS-vhf.Pifile
-### FROM https://github.com/trackIT-Systems/tsOS-Base/releases/download/2024.07.2/tsOS-Base-arm64-2024.07.2.zip
-Fetching remote: https://github.com/trackIT-Systems/tsOS-Base/releases/download/2024.07.2/tsOS-Base-arm64-2024.07.2.zip
+### FROM https://github.com/trackIT-Systems/tsOS-base/releases/download/2024.07.2/tsOS-base-arm64-2024.07.2.zip
+Fetching remote: https://github.com/trackIT-Systems/tsOS-base/releases/download/2024.07.2/tsOS-base-arm64-2024.07.2.zip
 ...
 ```
 
