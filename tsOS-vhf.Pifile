@@ -1,7 +1,7 @@
 # Set default ARCH
 : ${ARCH:=arm64}
 
-FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2025.3.3/tsOS-base-${ARCH}-2025.3.3.zip"
+FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2025.6.2/tsOS-base-${ARCH}-2025.6.2.zip"
 TO "tsOS-vhf-${ARCH}.img"
 PUMP 400M
 
