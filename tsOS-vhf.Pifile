@@ -27,8 +27,12 @@ INSTALL boot /boot
 INSTALL etc /etc
 INSTALL home /home
 
+RUN rm /home/pi/librtlsdr/.git
+INSTALL .git/modules/home/pi/librtlsdr /home/pi/librtlsdr/.git
 RUN rm /home/pi/pyradiotracking/.git
 INSTALL .git/modules/home/pi/pyradiotracking /home/pi/pyradiotracking/.git
+RUN rm /home/pi/pyrtlsdr/.git
+INSTALL .git/modules/home/pi/pyrtlsdr /home/pi/pyrtlsdr/.git
 
 # Fix permissions for pi user
 RUN chown -R pi:pi /home/pi/
