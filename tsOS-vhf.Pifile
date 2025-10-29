@@ -1,7 +1,7 @@
 # Set default ARCH
 : ${ARCH:=arm64}
 
-FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2025.6.2/tsOS-base-${ARCH}-2025.6.2.zip"
+FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2025.10.4/tsOS-base-${ARCH}-2025.10.4.zip"
 TO "tsOS-vhf-${ARCH}.img"
 PUMP 400M
 
@@ -15,7 +15,7 @@ PRETTY_NAME="$NAME $VERSION_ID ($VERSION_CODENAME)"
 NAME=$NAME
 VERSION_ID=$VERSION_ID
 VERSION="$VERSION_ID ($VERSION_CODENAME)"
-VERSION_CODENAME=bookworm
+VERSION_CODENAME=trixie
 ID=debian
 HOME_URL="https://trackit.systems/"
 SUPPORT_URL="https://github.com/trackIT-Systems/tsOS-vhf"
@@ -40,9 +40,6 @@ RUN chown -R pi:pi /home/pi/
 #################################################
 ### services configuration
 
-# Blacklist DVB-T driver
-RUN tee -a /etc/modprobe.d/raspi-blacklist.conf <<<'blacklist dvb_usb_rtl28xxu'
-
 # Install rtlsdr build dependencies
 RUN apt update
 RUN apt-get install -y build-essential cmake
@@ -53,20 +50,30 @@ RUN make -j4
 RUN make install
 RUN ldconfig
 
-RUN python3 -m pip install --break-system-packages -e /home/pi/pyrtlsdr
+RUN apt-get install -y \
+    python3-pkg-resources \
+    python3-setuptools \
+    python3-flask \
+    python3-plotly
+
+# Patch missing plotly.min.js 
+RUN mkdir -p /usr/lib/python3/dist-packages/plotly/package_data/
+RUN ln -s /usr/share/python3-plotly/plotly.js /usr/lib/python3/dist-packages/plotly/package_data/plotly.min.js
+
+ENV PIP_ROOT_USER_ACTION ignore
+ENV PIP_BREAK_SYSTEM_PACKAGES 1
+
+RUN python3 -m pip install --no-deps -e /home/pi/pyrtlsdr
 
 # Install radiotracking dependencies
-RUN python3 -m pip install --break-system-packages dash
+RUN python3 -m pip install --no-deps dash
 
 # Install radiotracking
-RUN python3 -m pip install --break-system-packages -e /home/pi/pyradiotracking
+RUN python3 -m pip install --no-deps -e /home/pi/pyradiotracking
 RUN systemctl enable radiotracking.service
-RUN systemctl enable radiotracking-config.service
-RUN tee -a /etc/sysdweb.conf <<EOF
-[radiotracking]
-title = RadioTracking | VHF Signal Detection
-unit = radiotracking
-EOF
 
-# Disable swap
-RUN systemctl disable dphys-swapfile.service
+#################################################
+### Cleanup image
+RUN rm -rf /var/lib/apt/lists/
+RUN apt-get clean
+ZERO

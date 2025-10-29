@@ -1,6 +1,7 @@
 [Unit]
 Description=RadioTracking
 After=network.target mosquitto.service time-sync.target hostname-config.service
+Requires=time-sync.target
 
 # Reboot after more than 10 restarts in 15 minutes happened.
 # This will happen after 10 minutes at the earliest, according to service configuration.
