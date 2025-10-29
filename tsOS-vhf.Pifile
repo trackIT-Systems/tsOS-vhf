@@ -8,14 +8,14 @@ PUMP 400M
 # Set os-release info
 NAME="tsOS-vhf"
 VERSION_ID=`git describe --tags --always || true`
-VERSION_CODENAME=bookworm
+VERSION_CODENAME=trixie
 
 RUN tee /etc/os-release <<EOF
 PRETTY_NAME="$NAME $VERSION_ID ($VERSION_CODENAME)"
 NAME=$NAME
 VERSION_ID=$VERSION_ID
 VERSION="$VERSION_ID ($VERSION_CODENAME)"
-VERSION_CODENAME=trixie
+VERSION_CODENAME=$VERSION_CODENAME
 ID=debian
 HOME_URL="https://trackit.systems/"
 SUPPORT_URL="https://github.com/trackIT-Systems/tsOS-vhf"
