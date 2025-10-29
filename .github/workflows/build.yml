@@ -4,7 +4,7 @@ on: push
 
 jobs:
   release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Create release
         uses: softprops/action-gh-release@v1
@@ -14,7 +14,7 @@ jobs:
           generate_release_notes: True
 
   build-tsOS-vhf:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     needs: release
     steps:
       - name: Checkout repository
@@ -24,7 +24,7 @@ jobs:
           token: ${{ secrets.PAT_JONASHOECHST }}
 
       - name: Run tsOS-vhf.Pifile
-        uses: Nature40/pimod@v0.7.0
+        uses: Nature40/pimod@v0.8.0
         with:
           pifile: tsOS-vhf.Pifile
 
