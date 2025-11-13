@@ -1,5 +1,5 @@
 [Unit]
-Description=RadioTracking
+Description=Detect signals of wildlife tracking transmitters with RTL SDR devices
 After=network.target mosquitto.service time-sync.target hostname-config.service
 Requires=time-sync.target
 
