@@ -1,25 +1,37 @@
 # Set default ARCH
 : ${ARCH:=arm64}
 
-FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2025.11.4/tsOS-base-${ARCH}-2025.11.4.zip"
+FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2025.12.6/tsOS-base-${ARCH}-2025.12.6.zip"
 TO "tsOS-vhf-${ARCH}.img"
 PUMP 400M
 
 # Set os-release info
-NAME="tsOS-vhf"
+NAME="tsOS"
+VARIANT="VHF"
+VERSION_CODENAME="Barbastella"
+
 VERSION_ID=`git describe --tags --always || true`
-VERSION_CODENAME=trixie
+VERSION_COMMIT=`git rev-parse --verify HEAD`
 
 RUN tee /etc/os-release <<EOF
-PRETTY_NAME="$NAME $VERSION_ID ($VERSION_CODENAME)"
+PRETTY_NAME="$NAME $VARIANT $VERSION_ID ($VERSION_CODENAME)"
 NAME=$NAME
+ID="${NAME,,}"
+ID_LIKE=debian
+VARIANT=$VARIANT
+VARIANT_ID=${VARIANT,,}
 VERSION_ID=$VERSION_ID
 VERSION="$VERSION_ID ($VERSION_CODENAME)"
+VERSION_COMMIT=$VERSION_COMMIT
 VERSION_CODENAME=$VERSION_CODENAME
-ID=debian
 HOME_URL="https://trackit.systems/"
 SUPPORT_URL="https://github.com/trackIT-Systems/tsOS-vhf"
 BUG_REPORT_URL="https://github.com/trackIT-Systems/tsOS-vhf/issues"
+EOF
+
+# write build process entry
+RUN tee -a /boot/firmware/issue.txt <<EOF
+Modified using pimod, https://github.com/trackIT-Systems/tsOS-vhf, $VERSION_COMMIT, $VERSION_ID
 EOF
 
 # Install custom folders 
@@ -41,6 +53,7 @@ RUN chown -R pi:pi /home/pi/
 ### services configuration
 
 # Install rtlsdr build dependencies
+RUN mkdir -p /var/cache/apt/archives/partial
 RUN apt update
 RUN apt-get install -y build-essential cmake
 
@@ -76,4 +89,6 @@ RUN systemctl enable radiotracking.service
 ### Cleanup image
 RUN rm -rf /var/lib/apt/lists/
 RUN apt-get clean
+
 ZERO
+SHRINK

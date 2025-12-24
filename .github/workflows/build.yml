@@ -21,10 +21,10 @@ jobs:
         uses: actions/checkout@v1
         with:
           submodules: recursive
-          token: ${{ secrets.PAT_JONASHOECHST }}
+          token: ${{ secrets.TSDEPLOY_REPO_READ }}
 
       - name: Run tsOS-vhf.Pifile
-        uses: Nature40/pimod@v0.8.0
+        uses: Nature40/pimod@v0.9.1
         with:
           pifile: tsOS-vhf.Pifile
 
