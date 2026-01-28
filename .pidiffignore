@@ -1,0 +1,4 @@
+*.pyc
+etc/shadow
+etc/shadow-
+.DS_Store
