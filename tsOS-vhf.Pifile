@@ -1,9 +1,9 @@
 # Set default ARCH
 : ${ARCH:=arm64}
 
-FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2026.1.1/tsOS-base-${ARCH}-2026.1.1.zip"
+FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2026.1.2/tsOS-base-${ARCH}-2026.1.2.zip"
 TO "tsOS-vhf-${ARCH}.img"
-PUMP 400M
+PUMP 500M
 
 # Set os-release info
 NAME="tsOS"
