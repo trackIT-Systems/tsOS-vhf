@@ -1,4 +1,4 @@
-name: Build tsOS-vhf Images
+name: Build tsOS-vhf Image
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Create release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           prerelease: True
@@ -21,7 +21,7 @@ jobs:
     needs: release
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           token: ${{ secrets.TSDEPLOY_REPO_READ }}
@@ -31,39 +31,52 @@ jobs:
         with:
           pifile: tsOS-vhf.Pifile
 
+      - name: Remove pimod cache
+        run: rm -rf .cache
+
       - name: Package tsOS-vhf-arm64-${{github.ref_name}}.zip
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           mv tsOS-vhf-arm64.img tsOS-vhf-arm64-${{github.ref_name}}.img
-          zip tsOS-vhf-arm64-${{github.ref_name}}.zip tsOS-vhf-arm64-${{github.ref_name}}.img
+          zip -9 tsOS-vhf-arm64-${{github.ref_name}}.zip tsOS-vhf-arm64-${{github.ref_name}}.img
 
       - name: Upload Release tsOS-vhf-arm64-${{github.ref_name}}.zip
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{github.ref_name}} tsOS-vhf-arm64-${{github.ref_name}}.zip
+        run: |
+          gh release upload ${{github.ref_name}} tsOS-vhf-arm64-${{github.ref_name}}.zip
+          rm -f tsOS-vhf-arm64-${{github.ref_name}}.zip
 
-      - name: Get latest stable release
+      - name: Get latest release
         id: get_latest_release
         run: |
-          LATEST_RELEASE=$(gh release list --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName' || echo "")
-          echo "latest_release=$LATEST_RELEASE" >> $GITHUB_OUTPUT
-          echo "Latest stable release: $LATEST_RELEASE"
+          TAG=$(gh release list --limit 50 --json tagName,isPrerelease --jq 'first(.[] | select(.tagName != "${{ github.ref_name }}") | .tagName) // empty' || echo "")
+          echo "latest_release=$TAG" >> $GITHUB_OUTPUT
+          echo "Latest release (any; excluding current): ${TAG:-<none>}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download previous release image
+      - name: Get latest stable release
+        id: get_latest_stable_release
+        run: |
+          TAG=$(gh release list --limit 50 --json tagName,isPrerelease --jq 'first(.[] | select((.isPrerelease | not) and .tagName != "${{ github.ref_name }}") | .tagName) // empty' || echo "")
+          echo "latest_stable_release=$TAG" >> $GITHUB_OUTPUT
+          echo "Latest stable release (excluding current): ${TAG:-<none>}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch and unpack latest release base
         if: steps.get_latest_release.outputs.latest_release != ''
         run: |
-          PREVIOUS_TAG="${{ steps.get_latest_release.outputs.latest_release }}"
-          echo "Downloading tsOS-vhf-arm64-${PREVIOUS_TAG}.zip"
-          gh release download ${PREVIOUS_TAG} -p "tsOS-vhf-arm64-${PREVIOUS_TAG}.zip"
-          unzip "tsOS-vhf-arm64-${PREVIOUS_TAG}.zip"
-          echo "Downloaded and extracted: tsOS-vhf-arm64-${PREVIOUS_TAG}.img"
+          BASE_TAG="${{ steps.get_latest_release.outputs.latest_release }}"
+          gh release download ${BASE_TAG} -p "tsOS-vhf-arm64-${BASE_TAG}.zip"
+          unzip "tsOS-vhf-arm64-${BASE_TAG}.zip"
+          rm -f "tsOS-vhf-arm64-${BASE_TAG}.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate update file with pidiff
+      - name: Generate update from latest release with pidiff
         if: steps.get_latest_release.outputs.latest_release != ''
         uses: Nature40/pimod/pidiff@master
         with:
@@ -74,11 +87,45 @@ jobs:
           tar: true
           rsync_options: --exclude-from=.pidiffignore
 
-      - name: Upload update file to release
+      - name: Upload update from latest release to release
         if: steps.get_latest_release.outputs.latest_release != '' && startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PREVIOUS_TAG="${{ steps.get_latest_release.outputs.latest_release }}"
+          BASE_TAG="${{ steps.get_latest_release.outputs.latest_release }}"
           CURRENT_TAG="${{ github.ref_name }}"
-          gh release upload ${CURRENT_TAG} "tsOS-vhf-arm64-update-${PREVIOUS_TAG}-to-${CURRENT_TAG}.tar"
+          TAR="tsOS-vhf-arm64-update-${BASE_TAG}-to-${CURRENT_TAG}.tar"
+          gh release upload ${CURRENT_TAG} "$TAR"
+          rm -f "tsOS-vhf-arm64-${BASE_TAG}.img" "$TAR"
+
+      - name: Fetch and unpack latest stable release base
+        if: steps.get_latest_stable_release.outputs.latest_stable_release != '' && steps.get_latest_stable_release.outputs.latest_stable_release != steps.get_latest_release.outputs.latest_release
+        run: |
+          BASE_TAG="${{ steps.get_latest_stable_release.outputs.latest_stable_release }}"
+          gh release download ${BASE_TAG} -p "tsOS-vhf-arm64-${BASE_TAG}.zip"
+          unzip "tsOS-vhf-arm64-${BASE_TAG}.zip"
+          rm -f "tsOS-vhf-arm64-${BASE_TAG}.zip"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate update from latest stable release with pidiff
+        if: steps.get_latest_stable_release.outputs.latest_stable_release != '' && steps.get_latest_stable_release.outputs.latest_stable_release != steps.get_latest_release.outputs.latest_release
+        uses: Nature40/pimod/pidiff@master
+        with:
+          base_image: tsOS-vhf-arm64-${{ steps.get_latest_stable_release.outputs.latest_stable_release }}.img
+          updated_image: tsOS-vhf-arm64-${{ github.ref_name }}.img
+          partition: 2
+          output: tsOS-vhf-arm64-update-${{ steps.get_latest_stable_release.outputs.latest_stable_release }}-to-${{ github.ref_name }}
+          tar: true
+          rsync_options: --exclude-from=.pidiffignore
+
+      - name: Upload update from latest stable release to release
+        if: steps.get_latest_stable_release.outputs.latest_stable_release != '' && steps.get_latest_stable_release.outputs.latest_stable_release != steps.get_latest_release.outputs.latest_release && startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BASE_TAG="${{ steps.get_latest_stable_release.outputs.latest_stable_release }}"
+          CURRENT_TAG="${{ github.ref_name }}"
+          TAR="tsOS-vhf-arm64-update-${BASE_TAG}-to-${CURRENT_TAG}.tar"
+          gh release upload ${CURRENT_TAG} "$TAR"
+          rm -f "tsOS-vhf-arm64-${BASE_TAG}.img" "$TAR"
