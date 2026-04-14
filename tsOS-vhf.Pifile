@@ -79,6 +79,7 @@ ENV PIP_BREAK_SYSTEM_PACKAGES 1
 RUN python3 -m pip install --no-deps -e /home/pi/pyrtlsdr
 
 # Install radiotracking dependencies
+RUN apt install python3-importlib-metadata
 RUN python3 -m pip install --no-deps dash
 
 # Install radiotracking
