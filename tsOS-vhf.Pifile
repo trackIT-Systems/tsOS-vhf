@@ -90,6 +90,7 @@ RUN systemctl enable radiotracking.service
 ### Cleanup image
 RUN rm -rf /var/lib/apt/lists/
 RUN apt-get clean
+RUN find . -name "*.pyc" -exec rm -f {} \;
 
 ZERO
 SHRINK
