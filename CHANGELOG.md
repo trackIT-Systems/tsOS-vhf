@@ -14,6 +14,10 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 
 - Tag releases use the matching `CHANGELOG.md` section as the GitHub release body (fall back to generated notes if that heading is missing)
 
+### Fixed
+
+- Restart radiotracking analyzers that hang before the first USB sample (libusb stall after device open was never recovered)
+
 ## [2026.5.1] - 2026-05-08
 
 Field Release III / 2026. Adds an explicit tuner-bandwidth setting and SDR metrics for configuration in challenging RF environments.
