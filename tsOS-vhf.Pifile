@@ -1,7 +1,7 @@
 # Set default ARCH
 : ${ARCH:=arm64}
 
-FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2026.4.1/tsOS-base-${ARCH}-2026.4.1.zip"
+FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2026.9.1/tsOS-base-${ARCH}-2026.9.1.zip"
 TO "tsOS-vhf-${ARCH}.img"
 PUMP 500M
 
@@ -80,7 +80,7 @@ RUN python3 -m pip install --no-deps -e /home/pi/pyrtlsdr
 
 # Install radiotracking dependencies
 RUN apt install python3-importlib-metadata
-RUN python3 -m pip install --no-deps dash
+RUN python3 -m pip install --no-deps dash janus comm nest-asyncio retrying
 
 # Install radiotracking
 RUN python3 -m pip install --no-deps -e /home/pi/pyradiotracking

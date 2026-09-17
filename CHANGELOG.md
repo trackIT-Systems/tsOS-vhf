@@ -12,11 +12,37 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 
 ### Changed
 
+- Install radiotracking pip dependencies `janus`, `comm`, `nest-asyncio`, and `retrying` alongside `dash` (required because packages are installed with `--no-deps`)
+
+## [2026.9.1] - 2026-09-17
+
+Built on [tsOS-base 2026.9.1](https://github.com/trackIT-Systems/tsOS-base/releases/tag/2026.9.1). Recovers radiotracking analyzers that stall before the first USB sample, and picks up platform fixes since 2026.4.1 (hostname at boot, Wi-Fi reconnect, environmental sensors).
+
+### Changed
+
 - Tag releases use the matching `CHANGELOG.md` section as the GitHub release body (fall back to generated notes if that heading is missing)
+- Based on tsOS-base 2026.9.1 (from 2026.4.1)
+
+### Added (via tsOS-base 2026.6.1–2026.9.1)
+
+- `pyenvsense` environmental sensor daemon (`envsensed`), default config at `/boot/firmware/envsense.yml` (SoC temperature)
+- Second I2C bus (`dtparam=i2c_vc=on`)
+- `wificheck` service for automatic Wi-Fi reconnection
+- `mqttutil` reporting of `vcgencmd` firmware metrics (clocks, voltages, PMIC, throttling) and RP1/PMIC thermals
+- Avahi restricted to `eth0` and `wlan0` (excludes macvlan and other virtual interfaces)
+
+### Changed (via tsOS-base 2026.6.1–2026.9.1)
+
+- ARM I2C bus 1 baud rate set to 400 kHz
+- `hostname-config` runs as a `network-pre.target` service before Avahi and NetworkManager (hostname/timezone via files, not D-Bus)
+- Updated `tsconfig` and `tsschedule` (mqttutil.conf, brownout recovery, `huaweicheck` / `wificheck`, fixed maintenance clock times)
+- `tsupdate` rsync behaviour improved
 
 ### Fixed
 
 - Restart radiotracking analyzers that hang before the first USB sample (libusb stall after device open was never recovered)
+- `hostname-config` systemd ordering cycle with `sockets.target` that skipped the unit at boot (via tsOS-base 2026.9.1)
+- `tsupdate` preserves `cmdline.txt` mtime/atime during tryboot so tsconfig does not treat it as newer than the source config (via tsOS-base 2026.7.2)
 
 ## [2026.5.1] - 2026-05-08
 
@@ -461,7 +487,8 @@ Tag `2023.03.1-beta1` points at the same commit.
 
 First calendar-tagged tRackIT OS image of 2023, based on Raspberry Pi OS bullseye (2022-09-22). The image already included the radiotracking stack, MQTT logging, GPS/chrony time sync, Victron Energy SmartSolar readout (`pysmartsolar`), Huawei/Brovi E7720-325 support, Avahi services, a landing page, and `flash.sh` for writing SD cards.
 
-[Unreleased]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.5.1...HEAD
+[Unreleased]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.9.1...HEAD
+[2026.9.1]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.5.1...2026.9.1
 [2026.5.1]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.4.1...2026.5.1
 [2026.4.1]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.3.2...2026.4.1
 [2026.3.2]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.1.2...2026.3.2
