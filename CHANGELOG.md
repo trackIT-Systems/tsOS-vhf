@@ -14,6 +14,7 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 
 - `radiotracking.service` runs as root
 - usbfs memory limit is removed at boot via `/etc/tmpfiles.d/usbfs.conf` instead of in `radiotracking.service`
+- `radiotracking.service` requires the `/boot/firmware` and `/data` mounts and only starts if `/boot/firmware/radiotracking.ini` exists
 
 ### Removed
 

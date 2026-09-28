@@ -2,6 +2,8 @@
 Description=Detect signals of wildlife tracking transmitters with RTL SDR devices
 After=network.target mosquitto.service time-sync.target hostname-config.service
 Requires=time-sync.target
+RequiresMountsFor=/boot/firmware /data
+ConditionPathExists=/boot/firmware/radiotracking.ini
 
 # Reboot after more than 10 restarts in 15 minutes happened.
 # This will happen after 10 minutes at the earliest, according to service configuration.
