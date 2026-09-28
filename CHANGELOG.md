@@ -10,6 +10,10 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 
 ## [Unreleased]
 
+### Removed
+
+- `wlan1.conf` boot-partition config and the optional `wlan1` extra Wi-Fi client it configured; no longer required
+
 ## [2027.0.1] - 2026-09-23
 
 Built on [tsOS-base 2027.0.1](https://github.com/trackIT-Systems/tsOS-base/releases/tag/2027.0.1). Major platform upgrade to Debian Trixie (kernel 6.18); arm64-only; application sources relocated to `/usr/local/src`.

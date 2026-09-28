@@ -29,7 +29,7 @@ Flash with Raspberry Pi Imager or `dd`. Default hostname is `tsos-default-name` 
 
 **SSH:** user `pi`, password `natur`. Drop a public-key file at `/boot/firmware/authorized_keys` on the card; it is installed for `pi` and `root` on boot.
 
-**Wi-Fi hotspot:** SSID follows the hostname, PSK `BirdsAndBats`. The station is `169.254.0.1`. An optional extra client network can be defined in [`wlan1.conf`](boot/firmware/wlan1.conf).
+**Wi-Fi hotspot:** SSID follows the hostname, PSK `BirdsAndBats`. The station is `169.254.0.1`.
 
 **Web:** Caddy on port 80 — tsconfig at `/`, FileBrowser Quantum at `/data/`, radiotracking dashboard at `/radiotracking/` ([Caddyfile](etc/caddy/Caddyfile)).
 
@@ -41,7 +41,6 @@ Runtime settings live on the VFAT boot partition (`/boot/firmware` on the Pi). E
 | --- | --- |
 | `cmdline.txt` | `systemd.hostname=`, `timezone=`, first-boot `repartition` |
 | [`radiotracking.ini`](boot/firmware/radiotracking.ini) | pyradiotracking ([example](https://github.com/trackIT-Systems/pyradiotracking/blob/main/etc/radiotracking.ini)) |
-| [`wlan1.conf`](boot/firmware/wlan1.conf) | Optional extra Wi-Fi client (`wlan1`) |
 | `mqttutil.conf` | MQTT system reporting |
 | `mosquitto.d/` | Extra Mosquitto broker configs (`include_dir`) |
 | `wireguard.conf` | WireGuard interface |
@@ -49,7 +48,7 @@ Runtime settings live on the VFAT boot partition (`/boot/firmware` on the Pi). E
 | `tsconfig.yml` | tsconfig service config |
 | `geolocation` | Static GPS coordinates |
 
-Platform files other than `radiotracking.ini` and `wlan1.conf` come from tsOS-base. See that project's [boot configuration](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md#boot-configuration).
+Platform files other than `radiotracking.ini` come from tsOS-base. See that project's [boot configuration](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md#boot-configuration).
 
 In tsconfig, saving and deploying configuration are separate actions — use **Deploy** after saving changes that should take effect on the station.
 
