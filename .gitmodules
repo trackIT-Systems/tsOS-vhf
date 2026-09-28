@@ -1,9 +1,9 @@
 [submodule "home/pi/pyradiotracking"]
-	path = home/pi/pyradiotracking
+	path = usr/local/src/pyradiotracking
 	url = https://github.com/trackIT-Systems/pyradiotracking.git
 [submodule "home/pi/librtlsdr"]
-	path = home/pi/librtlsdr
+	path = usr/local/src/librtlsdr
 	url = https://github.com/librtlsdr/librtlsdr.git
 [submodule "home/pi/pyrtlsdr"]
-	path = home/pi/pyrtlsdr
+	path = usr/local/src/pyrtlsdr
 	url = https://github.com/pyrtlsdr/pyrtlsdr.git

@@ -1,7 +1,7 @@
 # Set default ARCH
 : ${ARCH:=arm64}
 
-FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2026.9.1/tsOS-base-${ARCH}-2026.9.1.zip"
+FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2027.0.1/tsOS-base-${ARCH}-2027.0.1.zip"
 TO "tsOS-vhf-${ARCH}.img"
 PUMP 500M
 
@@ -38,16 +38,18 @@ EOF
 INSTALL boot /boot
 INSTALL etc /etc
 INSTALL home /home
+INSTALL usr /usr
 
-RUN rm /home/pi/librtlsdr/.git
-INSTALL .git/modules/home/pi/librtlsdr /home/pi/librtlsdr/.git
-RUN rm /home/pi/pyradiotracking/.git
-INSTALL .git/modules/home/pi/pyradiotracking /home/pi/pyradiotracking/.git
-RUN rm /home/pi/pyrtlsdr/.git
-INSTALL .git/modules/home/pi/pyrtlsdr /home/pi/pyrtlsdr/.git
+RUN rm /usr/local/src/librtlsdr/.git
+INSTALL .git/modules/home/pi/librtlsdr /usr/local/src/librtlsdr/.git
+RUN rm /usr/local/src/pyradiotracking/.git
+INSTALL .git/modules/home/pi/pyradiotracking /usr/local/src/pyradiotracking/.git
+RUN rm /usr/local/src/pyrtlsdr/.git
+INSTALL .git/modules/home/pi/pyrtlsdr /usr/local/src/pyrtlsdr/.git
 
 # Fix permissions for pi user
 RUN chown -R pi:pi /home/pi/
+RUN chown -R pi:pi /usr/local/src
 
 #################################################
 ### services configuration
@@ -55,9 +57,9 @@ RUN chown -R pi:pi /home/pi/
 # Install rtlsdr build dependencies
 RUN mkdir -p /var/cache/apt/archives/partial
 RUN apt update
-RUN apt-get install -y build-essential cmake
+RUN apt-get install -y build-essential cmake libusb-1.0-0-dev
 
-WORKDIR /home/pi/librtlsdr
+WORKDIR /usr/local/src/librtlsdr
 RUN cmake . -DINSTALL_UDEV_RULES=ON
 RUN make -j4
 RUN make install
@@ -76,14 +78,14 @@ RUN ln -s /usr/share/python3-plotly/plotly.js /usr/lib/python3/dist-packages/plo
 ENV PIP_ROOT_USER_ACTION ignore
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
 
-RUN python3 -m pip install --no-deps -e /home/pi/pyrtlsdr
+RUN python3 -m pip install --no-deps -e /usr/local/src/pyrtlsdr
 
 # Install radiotracking dependencies
 RUN apt install python3-importlib-metadata
 RUN python3 -m pip install --no-deps dash janus comm nest-asyncio retrying
 
 # Install radiotracking
-RUN python3 -m pip install --no-deps -e /home/pi/pyradiotracking
+RUN python3 -m pip install --no-deps -e /usr/local/src/pyradiotracking
 RUN systemctl enable radiotracking.service
 
 #################################################

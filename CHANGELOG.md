@@ -10,9 +10,35 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 
 ## [Unreleased]
 
+## [2027.0.1] - 2026-09-23
+
+Built on [tsOS-base 2027.0.1](https://github.com/trackIT-Systems/tsOS-base/releases/tag/2027.0.1). Major platform upgrade to Debian Trixie (kernel 6.18); arm64-only; application sources relocated to `/usr/local/src`.
+
 ### Changed
 
+- Based on tsOS-base 2027.0.1 (from 2026.9.1)
+- `librtlsdr`, `pyrtlsdr`, and `pyradiotracking` source trees moved to `/usr/local/src` (matching tsOS-base convention)
+- Build uses pimod v0.9.3 (from v0.9.1)
 - Install radiotracking pip dependencies `janus`, `comm`, `nest-asyncio`, and `retrying` alongside `dash` (required because packages are installed with `--no-deps`)
+- Caddy `/data` proxy updated for FileBrowser Quantum (via tsOS-base 2027.0.1)
+- `libusb-1.0-0-dev` added as a librtlsdr build dependency (required on tsOS-base 2027.0.1 / Trixie)
+
+### Removed
+
+- armhf image builds and `tsOS-vhf-armhf.Pifile` (tsOS-base 2027.0.1 is arm64-only)
+
+### Added (via tsOS-base 2027.0.1)
+
+- FileBrowser Quantum v1.5.6-stable at `/data/` (replaces File Browser; same URLs, no-auth)
+
+### Changed (via tsOS-base 2027.0.1)
+
+- Raspberry Pi OS Lite base image updated to 2026-09-15 (Trixie, kernel 6.18)
+- Application git submodules in base live under `/usr/local/src` instead of `/home/pi`
+- `uhubctl` installed from apt instead of built from source
+- WittyPi RTC DKMS module and overlay installed from `wittypi4` (`tsschedule` no longer ships the kernel driver)
+- Updated `tsconfig` (saving configuration no longer deploys automatically; save and deploy are separate actions)
+- Default `pi` password, zsh login shell, and passwordless `sudo` set in the image; first-boot `userconfig.service` disabled
 
 ## [2026.9.1] - 2026-09-17
 
@@ -487,7 +513,8 @@ Tag `2023.03.1-beta1` points at the same commit.
 
 First calendar-tagged tRackIT OS image of 2023, based on Raspberry Pi OS bullseye (2022-09-22). The image already included the radiotracking stack, MQTT logging, GPS/chrony time sync, Victron Energy SmartSolar readout (`pysmartsolar`), Huawei/Brovi E7720-325 support, Avahi services, a landing page, and `flash.sh` for writing SD cards.
 
-[Unreleased]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.9.1...HEAD
+[Unreleased]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2027.0.1...HEAD
+[2027.0.1]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.9.1...2027.0.1
 [2026.9.1]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.5.1...2026.9.1
 [2026.5.1]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.4.1...2026.5.1
 [2026.4.1]: https://github.com/trackIT-Systems/tsOS-vhf/compare/2026.3.2...2026.4.1

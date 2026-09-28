@@ -6,7 +6,7 @@ tsOS-vhf is a Raspberry Pi OS image for unattended VHF wildlife-tracking station
 
 [trackIT Systems](https://trackit.systems) supplies **vhf:tracker** stations commercially, running this image in the field.
 
-The image is built on [tsOS-base](https://github.com/trackIT-Systems/tsOS-base) and ships two architectures: **arm64** (Raspberry Pi 3+ / Compute Module; primary) and **armhf** (older Pi models).
+The image is built on [tsOS-base](https://github.com/trackIT-Systems/tsOS-base) for **arm64** (Raspberry Pi 3+ / Compute Module).
 
 ## What's in the image
 
@@ -17,11 +17,11 @@ On top of tsOS-base:
 - **Caddy** route `/radiotracking/` to the dashboard (`localhost:8050`)
 - **`radiotracking.service`** — starts after time sync, `Nice=-10`, writes detections to `/data`
 
-Inherited from [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md): tsconfig, Filebrowser, Mosquitto, mqttutil, Chrony/gpsd, WittyPi (`tsschedule`), WireGuard, Samba, LTE helpers, overlayroot.
+Inherited from [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md): tsconfig, FileBrowser Quantum, Mosquitto, mqttutil, Chrony/gpsd, WittyPi (`tsschedule`), WireGuard, Samba, LTE helpers, overlayroot.
 
 ## Download and flash
 
-Images are published in [GitHub Releases](https://github.com/trackIT-Systems/tsOS-vhf/releases). Use the arm64 build for Pi 3 and newer; use armhf for older boards. Release notes live in [CHANGELOG.md](CHANGELOG.md).
+Images are published in [GitHub Releases](https://github.com/trackIT-Systems/tsOS-vhf/releases). Release notes live in [CHANGELOG.md](CHANGELOG.md).
 
 Flash with Raspberry Pi Imager or `dd`. Default hostname is `tsos-default-name` (set `systemd.hostname=` in [`cmdline.txt`](https://github.com/trackIT-Systems/tsOS-base/blob/main/boot/firmware/cmdline.txt) on the boot partition). For backend matching, use `<planner>-<project>-<number>`; each station name must be unique.
 
@@ -31,7 +31,7 @@ Flash with Raspberry Pi Imager or `dd`. Default hostname is `tsos-default-name` 
 
 **Wi-Fi hotspot:** SSID follows the hostname, PSK `BirdsAndBats`. The station is `169.254.0.1`. An optional extra client network can be defined in [`wlan1.conf`](boot/firmware/wlan1.conf).
 
-**Web:** Caddy on port 80 — tsconfig at `/`, Filebrowser at `/data/`, radiotracking dashboard at `/radiotracking/` ([Caddyfile](etc/caddy/Caddyfile)).
+**Web:** Caddy on port 80 — tsconfig at `/`, FileBrowser Quantum at `/data/`, radiotracking dashboard at `/radiotracking/` ([Caddyfile](etc/caddy/Caddyfile)).
 
 ## Boot configuration
 
@@ -51,9 +51,11 @@ Runtime settings live on the VFAT boot partition (`/boot/firmware` on the Pi). E
 
 Platform files other than `radiotracking.ini` and `wlan1.conf` come from tsOS-base. See that project's [boot configuration](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md#boot-configuration).
 
+In tsconfig, saving and deploying configuration are separate actions — use **Deploy** after saving changes that should take effect on the station.
+
 ## Storage
 
-`/data` is the station data volume (ExFAT `datafs` after first-boot repartition, or a USB disk). `radiotracking.service` writes CSV detections there. Filebrowser roots at `/data`.
+`/data` is the station data volume (ExFAT `datafs` after first-boot repartition, or a USB disk). `radiotracking.service` writes CSV detections there. FileBrowser Quantum roots at `/data`.
 
 ## Updates
 
@@ -67,12 +69,10 @@ Platform files other than `radiotracking.ini` and `wlan1.conf` come from tsOS-ba
 
 ## Build
 
-Images are two-stage: a published [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/releases) zip, then this repo's Pifile via [pimod](https://github.com/Nature40/pimod) `v0.9.1` ([docker-compose.yml](docker-compose.yml)):
+Images are two-stage: a published [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/releases) zip (currently 2027.0.1), then this repo's Pifile via [pimod](https://github.com/Nature40/pimod) `v0.9.3` ([docker-compose.yml](docker-compose.yml)):
 
 ```sh
 docker-compose run --rm pimod pimod.sh tsOS-vhf.Pifile
-# armhf:
-docker-compose run --rm pimod pimod.sh tsOS-vhf-armhf.Pifile
 ```
 
 ## Further reading

@@ -2,8 +2,13 @@
     encode gzip
     reverse_proxy http://localhost:8000
 
-    handle_path /data/* {
-        reverse_proxy http://localhost:8080
+    handle /data* {
+        reverse_proxy http://localhost:8080 {
+            header_up Host {host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-For {remote_host}
+            flush_interval -1
+        }
     }
 
     route /radiotracking/* {

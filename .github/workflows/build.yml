@@ -51,7 +51,7 @@ jobs:
           token: ${{ secrets.TSDEPLOY_REPO_READ }}
 
       - name: Run tsOS-vhf.Pifile
-        uses: Nature40/pimod@v0.9.1
+        uses: Nature40/pimod@v0.9.3
         with:
           pifile: tsOS-vhf.Pifile
 
