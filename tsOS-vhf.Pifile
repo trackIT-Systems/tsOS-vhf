@@ -34,7 +34,6 @@ EOF
 # Install custom folders 
 INSTALL boot /boot
 INSTALL etc /etc
-INSTALL home /home
 INSTALL usr /usr
 
 RUN rm /usr/local/src/librtlsdr/.git

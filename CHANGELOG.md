@@ -13,6 +13,7 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 ### Removed
 
 - `wlan1.conf` boot-partition config and the optional `wlan1` extra Wi-Fi client it configured; no longer required
+- `/home/pi` helper files: `rtl_reflash.sh` with its `RTL2838UHIDIR.bin` EEPROM image, and the `relocate.py` lost+found recovery script
 
 ## [2027.0.1] - 2026-09-23
 
