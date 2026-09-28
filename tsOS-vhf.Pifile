@@ -38,11 +38,11 @@ INSTALL home /home
 INSTALL usr /usr
 
 RUN rm /usr/local/src/librtlsdr/.git
-INSTALL .git/modules/home/pi/librtlsdr /usr/local/src/librtlsdr/.git
+INSTALL .git/modules/usr/local/src/librtlsdr /usr/local/src/librtlsdr/.git
 RUN rm /usr/local/src/pyradiotracking/.git
-INSTALL .git/modules/home/pi/pyradiotracking /usr/local/src/pyradiotracking/.git
+INSTALL .git/modules/usr/local/src/pyradiotracking /usr/local/src/pyradiotracking/.git
 RUN rm /usr/local/src/pyrtlsdr/.git
-INSTALL .git/modules/home/pi/pyrtlsdr /usr/local/src/pyrtlsdr/.git
+INSTALL .git/modules/usr/local/src/pyrtlsdr /usr/local/src/pyrtlsdr/.git
 
 # Fix permissions for pi user
 RUN chown -R pi:pi /home/pi/
