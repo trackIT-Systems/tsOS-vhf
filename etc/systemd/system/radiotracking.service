@@ -11,13 +11,9 @@ StartLimitAction=reboot
 
 [Service]
 Nice=-10
-ExecStartPre=+/bin/bash -c "echo 0 > /sys/module/usbcore/parameters/usbfs_memory_mb"
-ExecStartPre=+/bin/bash -c 'exec uhubctl | while read line; do echo "INFO;uhubctl;$line"; done | mosquitto_pub -l -t `hostname`/radiotracking/log/csv'
 ExecStart=radiotracking --config /boot/firmware/radiotracking.ini --station %H --dashboard --dashboard-host localhost --dashboard-port 8050 --mqtt --mqtt-host localhost --mqtt-port 1883 --csv --export-config --path /data
 Restart=always
 RestartSec=60s
-User=pi
-Group=pi
 
 [Install]
 WantedBy=multi-user.target

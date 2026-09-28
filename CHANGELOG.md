@@ -10,8 +10,14 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 
 ## [Unreleased]
 
+### Changed
+
+- `radiotracking.service` runs as root
+- usbfs memory limit is removed at boot via `/etc/tmpfiles.d/usbfs.conf` instead of in `radiotracking.service`
+
 ### Removed
 
+- uhubctl status published to `<host>/radiotracking/log/csv` on radiotracking start
 - `wlan1.conf` boot-partition config and the optional `wlan1` extra Wi-Fi client it configured; no longer required
 - `/home/pi` helper files: `rtl_reflash.sh` with its `RTL2838UHIDIR.bin` EEPROM image, and the `relocate.py` lost+found recovery script
 

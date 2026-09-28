@@ -63,7 +63,6 @@ In tsconfig, saving and deploying configuration are separate actions — use **D
 ## Hardware
 
 - RTL-SDR dongles (R802T): staged gains `lna_gain`, `mixer_gain`, `vga_gain` via the librtlsdr fork
-- USB hub power via `uhubctl` (logged on radiotracking start)
 - Plus tsOS-base hardware: WittyPi 4, GPS, LTE, watchdog — [tsOS-base hardware](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md#hardware)
 
 ## Build
