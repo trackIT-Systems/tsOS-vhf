@@ -12,14 +12,15 @@ The image is built on [tsOS-base](https://github.com/trackIT-Systems/tsOS-base) 
 
 On top of tsOS-base:
 
-- **[pyradiotracking](https://github.com/trackIT-Systems/pyradiotracking)** — RTL-SDR signal detection, matching, CSV/MQTT export, dashboard
+- **[pyradiotracking](https://github.com/trackIT-Systems/pyradiotracking)** — RTL-SDR signal detection, matching, CSV/MQTT export
 - **[librtlsdr](https://github.com/librtlsdr/librtlsdr)** fork and **[pyrtlsdr](https://github.com/pyrtlsdr/pyrtlsdr)** — R802T gain stages and Python bindings
-- **Caddy** route `/radiotracking/` to the dashboard (`localhost:8050`)
-- **`radiotracking.service`** — starts after time sync, `Nice=-10`, writes detections to `/data`
+- **`radiotracking.service`** — runs as `pi` in a systemd sandbox, starts after time sync, `Nice=-10`, writes detections to `/data`
 
-Inherited from [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md): tsconfig, FileBrowser Quantum, Mosquitto, mqttutil, Chrony/gpsd, WittyPi (`tsschedule`), WireGuard, Samba, LTE helpers, overlayroot.
+Inherited from [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md): tsconfig, FileBrowser Quantum, Mosquitto, mqttutil, Chrony/gpsd, WittyPi (`tsschedule`), WireGuard, LTE helpers, overlayroot.
 
 ## Download and flash
+
+This release line is built on tsOS-base 2027.0.3 and changes the root/pi privilege model. Devices on earlier images have to be reflashed; no delta update is published into it.
 
 Images are published in [GitHub Releases](https://github.com/trackIT-Systems/tsOS-vhf/releases). Release notes live in [CHANGELOG.md](CHANGELOG.md).
 
@@ -27,11 +28,11 @@ Flash with Raspberry Pi Imager or `dd`. Default hostname is `tsos-default-name` 
 
 ## First access
 
-**SSH:** user `pi`, password `natur`. Drop a public-key file at `/boot/firmware/authorized_keys` on the card; it is installed for `pi` and `root` on boot.
+**SSH:** user `pi`, password `natur`. Drop a public-key file at `/boot/firmware/authorized_keys` on the card; it is installed for `pi` on boot. `root` accepts only the manufacturer key, and `pi` has no `sudo`.
 
 **Wi-Fi hotspot:** SSID follows the hostname, PSK `BirdsAndBats`. The station is `169.254.0.1`.
 
-**Web:** Caddy on port 80 — tsconfig at `/`, FileBrowser Quantum at `/data/`, radiotracking dashboard at `/radiotracking/` ([Caddyfile](etc/caddy/Caddyfile)).
+**Web:** Caddy on port 80, and optionally HTTPS on port 443 with a per-device certificate — tsconfig at `/` and FileBrowser Quantum at `/data/` (WebDAV at `/data/dav/data/`). Both ask for a login with the `pi` password. See tsOS-base [security](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/security.md).
 
 ## Boot configuration
 
@@ -67,7 +68,7 @@ In tsconfig, saving and deploying configuration are separate actions — use **D
 
 ## Build
 
-Images are two-stage: a published [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/releases) zip (currently 2027.0.1), then this repo's Pifile via [pimod](https://github.com/Nature40/pimod) `v0.9.3` ([docker-compose.yml](docker-compose.yml)):
+Images are two-stage: a published [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/releases) zip (currently 2027.0.3), then this repo's Pifile via [pimod](https://github.com/Nature40/pimod) `v0.9.3` ([docker-compose.yml](docker-compose.yml)):
 
 ```sh
 docker-compose run --rm pimod pimod.sh tsOS-vhf.Pifile

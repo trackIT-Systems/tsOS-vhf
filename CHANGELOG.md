@@ -10,17 +10,38 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 
 ## [Unreleased]
 
+**Built on tsOS-base 2027.0.3, which changes the root/pi privilege model (see [tsOS-base docs/security.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/security.md)). This is a reflash boundary: no delta update is published into it, and every device is reinstalled.**
+
 ### Changed
 
-- `radiotracking.service` runs as root
+- Based on tsOS-base 2027.0.3 (from 2027.0.1)
+- `radiotracking.service` runs as `pi` in a systemd sandbox (`ProtectSystem=strict`, writes only to `/data`, USB devices allowed) instead of root, and starts `/usr/local/bin/radiotracking` by absolute path
 - usbfs memory limit is removed at boot via `/etc/tmpfiles.d/usbfs.conf` instead of in `radiotracking.service`
 - `radiotracking.service` requires the `/boot/firmware` and `/data` mounts and only starts if `/boot/firmware/radiotracking.ini` exists
+- `/usr/local/src` is root-owned (like in tsOS-base); the librtlsdr build toolchain is removed again after building
+- Delta updates (pidiff) are only generated from releases at or after `DELTA_BASELINE`; pidiff pinned to v0.9.3
 
 ### Removed
 
+- radiotracking web dashboard (`dashboard = False` in `radiotracking.ini`, no `--dashboard*` options), together with its Dash, Flask and plotly packages
+- vhf's own Caddyfile and the `/radiotracking/` route; the tsOS-base Caddyfile applies unchanged (the "VHF Signals" link in tsconfig no longer leads anywhere)
 - uhubctl status published to `<host>/radiotracking/log/csv` on radiotracking start
 - `wlan1.conf` boot-partition config and the optional `wlan1` extra Wi-Fi client it configured; no longer required
 - `/home/pi` helper files: `rtl_reflash.sh` with its `RTL2838UHIDIR.bin` EEPROM image, and the `relocate.py` lost+found recovery script
+
+### Changed (via tsOS-base 2027.0.2–2027.0.3)
+
+- Operator authentication: tsconfig and `/data` require a login with the `pi` password; `pi` has no `sudo` (polkit for allowed actions); `root` is reachable via SSH key only; `/boot/firmware` is root-owned
+- Optional HTTPS on port 443 with a per-device certificate
+- Samba removed; `/data` is reached via HTTP(S), WebDAV (`/data/dav/data/`) or SSH/SFTP
+- Hotspot is WPA2-only; Avahi publishes over IPv4 only
+- Huawei / Brovi E3372 sticks run in modem mode; Teltonika TRM200 and Quectel EC200A supported
+- WittyPi RTC driver installed prebuilt from `wittypi4` 0.2.0
+
+### Added (via tsOS-base 2027.0.2–2027.0.3)
+
+- `smartsolar.service` (Victron SmartSolar) and `solarlife.service` (SolarLife MPPT) readout daemons
+- Per-install Bluetooth address
 
 ## [2027.0.1] - 2026-09-23
 

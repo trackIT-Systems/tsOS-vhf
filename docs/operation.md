@@ -49,7 +49,7 @@ Should `pyradiotracking` terminate itself or crash in some way, it restarts the 
 However, if more than five restarts occur over the duration of 10 minutes, the system will reboot itself.
 Rebooting the system also restarts the USB stack which can sometime help to mitigate errors in signal retrieval.
 
-> Note: When debugging errors or copying data from failed stations, the automatic rebooting can sometimes be annoying. You can always disable the `radiotracking` service using `sudo systemctl stop radiotracking`.
+> Note: When debugging errors or copying data from failed stations, the automatic rebooting can sometimes be annoying. You can always disable the `radiotracking` service using `systemctl stop radiotracking`.
 
 ## Monitoring 
 There are different measuring instruments showing different aspects of a *trackIT station's* health state.

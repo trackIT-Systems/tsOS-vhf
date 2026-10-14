@@ -68,13 +68,11 @@ All services in green are up and running. The log messages of the running servic
 ![Screenshot of the sysdweb user interface showing the log journal.](assets/sysdweb-journal.png)
 
 ### Check RadioTracking
-Next, access `radiotracking` to check if a nearby VHF transmitter is received correctly ([http://169.254.0.1/radiotracking](http://169.254.0.1/radiotracking)).
-
-![Screenshot of the radiotracking user interface showing detected signals.](assets/radiotracking-signals.png)
-
-The dots in blue indicate that a VHF transmitter is received on SDR 0 (north) which indicates signal detection is running correctly. 
+The web dashboard of `radiotracking` is disabled. To check that a nearby VHF transmitter is received, look at the service status in tsconfig or via `systemctl status radiotracking`, and at the detections written to `/data` (CSV files, available at `/data/` after login) or published via MQTT.
 
 ## 5. Configuration & Calibration
+> Note: The calibration routine below relies on the *Graphs* pane of the radiotracking dashboard, which is currently disabled.
+
 *trackIT stations* require to be calibrated when set up for the first time, since the used SDR devices differ in signal attenuation. To calibrate a station follow this routine: 
 
 1. Place a VHF transmitter roughly 150 meters away from the station.

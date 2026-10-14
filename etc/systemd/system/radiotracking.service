@@ -12,11 +12,32 @@ StartLimitIntervalSec=900s
 StartLimitAction=reboot
 
 [Service]
+Type=exec
+# Runs as pi with a sandbox like the other tsOS-base daemons (see tsOS-base docs/security.md).
+User=pi
+Group=pi
 Nice=-10
-ExecStart=radiotracking --config /boot/firmware/radiotracking.ini --station %H --dashboard --dashboard-host localhost --dashboard-port 8050 --mqtt --mqtt-host localhost --mqtt-port 1883 --csv --export-config --path /data
+ExecStart=/usr/local/bin/radiotracking --config /boot/firmware/radiotracking.ini --station %H --mqtt --mqtt-host localhost --mqtt-port 1883 --csv --export-config --path /data
 Restart=always
 RestartSec=60s
+ReadWritePaths=/data
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+# AF_NETLINK: libusb enumerates USB devices through a netlink socket (without it: "No supported devices found")
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+# RTL-SDR dongles are raw USB devices (/dev/bus/usb, mode 0666 via librtlsdr's rtl-sdr.rules)
+PrivateDevices=no
+DevicePolicy=closed
+DeviceAllow=char-usb_device rw
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+SystemCallArchitectures=native
 
 [Install]
 WantedBy=multi-user.target
-

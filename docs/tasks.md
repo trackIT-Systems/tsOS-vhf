@@ -43,7 +43,7 @@ It can be restarted by accessing the systemd web interface ([http://169.254.0.1/
 
 You may also [login via ssh](#login-via-ssh) and use `systemctl` to restart a service:
 ```
-pi@trackIT:~ $ sudo systemctl restart radiotracking
+pi@trackIT:~ $ systemctl restart radiotracking
 pi@trackIT:~ $ 
 ```
 

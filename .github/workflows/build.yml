@@ -8,6 +8,12 @@ on:
 permissions:
   contents: write
 
+env:
+  # Releases older than this are not offered a delta update (pidiff) into newer
+  # ones: tsOS-base 2027.0.2 changed the root/pi privilege model, so devices on
+  # earlier images have to be reflashed. Set to the first release built on it.
+  DELTA_BASELINE: "2027.0.2"
+
 jobs:
   release:
     runs-on: ubuntu-24.04-arm
@@ -90,8 +96,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check delta baseline
+        id: check_baseline
+        run: |
+          BASELINE="${{ env.DELTA_BASELINE }}"
+          check() {
+            [ -z "$1" ] && { echo true; return; }
+            NEWEST=$(printf '%s\n%s\n' "${1#v}" "${BASELINE#v}" | sort -V | tail -n1)
+            if [ "$NEWEST" = "${1#v}" ]; then echo false; else echo true; fi
+          }
+          LATEST="${{ steps.get_latest_release.outputs.latest_release }}"
+          STABLE="${{ steps.get_latest_stable_release.outputs.latest_stable_release }}"
+          echo "skip_latest=$(check "$LATEST")" >> "$GITHUB_OUTPUT"
+          echo "skip_stable=$(check "$STABLE")" >> "$GITHUB_OUTPUT"
+          echo "Delta baseline $BASELINE: latest=${LATEST:-<none>}, stable=${STABLE:-<none>} (skip when older than the baseline)"
+
       - name: Fetch and unpack latest release base
-        if: steps.get_latest_release.outputs.latest_release != ''
+        if: steps.get_latest_release.outputs.latest_release != '' && steps.check_baseline.outputs.skip_latest != 'true'
         run: |
           BASE_TAG="${{ steps.get_latest_release.outputs.latest_release }}"
           gh release download ${BASE_TAG} -p "tsOS-vhf-arm64-${BASE_TAG}.zip"
@@ -101,8 +122,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate update from latest release with pidiff
-        if: steps.get_latest_release.outputs.latest_release != ''
-        uses: Nature40/pimod/pidiff@master
+        if: steps.get_latest_release.outputs.latest_release != '' && steps.check_baseline.outputs.skip_latest != 'true'
+        uses: Nature40/pimod/pidiff@v0.9.3
         with:
           base_image: tsOS-vhf-arm64-${{ steps.get_latest_release.outputs.latest_release }}.img
           updated_image: tsOS-vhf-arm64-${{ github.ref_name }}.img
@@ -112,7 +133,7 @@ jobs:
           rsync_options: --exclude-from=.pidiffignore
 
       - name: Upload update from latest release to release
-        if: steps.get_latest_release.outputs.latest_release != '' && startsWith(github.ref, 'refs/tags/')
+        if: steps.get_latest_release.outputs.latest_release != '' && steps.check_baseline.outputs.skip_latest != 'true' && startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -123,7 +144,7 @@ jobs:
           rm -f "tsOS-vhf-arm64-${BASE_TAG}.img" "$TAR"
 
       - name: Fetch and unpack latest stable release base
-        if: steps.get_latest_stable_release.outputs.latest_stable_release != '' && steps.get_latest_stable_release.outputs.latest_stable_release != steps.get_latest_release.outputs.latest_release
+        if: steps.get_latest_stable_release.outputs.latest_stable_release != '' && steps.check_baseline.outputs.skip_stable != 'true' && steps.get_latest_stable_release.outputs.latest_stable_release != steps.get_latest_release.outputs.latest_release
         run: |
           BASE_TAG="${{ steps.get_latest_stable_release.outputs.latest_stable_release }}"
           gh release download ${BASE_TAG} -p "tsOS-vhf-arm64-${BASE_TAG}.zip"
@@ -133,8 +154,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate update from latest stable release with pidiff
-        if: steps.get_latest_stable_release.outputs.latest_stable_release != '' && steps.get_latest_stable_release.outputs.latest_stable_release != steps.get_latest_release.outputs.latest_release
-        uses: Nature40/pimod/pidiff@master
+        if: steps.get_latest_stable_release.outputs.latest_stable_release != '' && steps.check_baseline.outputs.skip_stable != 'true' && steps.get_latest_stable_release.outputs.latest_stable_release != steps.get_latest_release.outputs.latest_release
+        uses: Nature40/pimod/pidiff@v0.9.3
         with:
           base_image: tsOS-vhf-arm64-${{ steps.get_latest_stable_release.outputs.latest_stable_release }}.img
           updated_image: tsOS-vhf-arm64-${{ github.ref_name }}.img
@@ -144,7 +165,7 @@ jobs:
           rsync_options: --exclude-from=.pidiffignore
 
       - name: Upload update from latest stable release to release
-        if: steps.get_latest_stable_release.outputs.latest_stable_release != '' && steps.get_latest_stable_release.outputs.latest_stable_release != steps.get_latest_release.outputs.latest_release && startsWith(github.ref, 'refs/tags/')
+        if: steps.get_latest_stable_release.outputs.latest_stable_release != '' && steps.check_baseline.outputs.skip_stable != 'true' && steps.get_latest_stable_release.outputs.latest_stable_release != steps.get_latest_release.outputs.latest_release && startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

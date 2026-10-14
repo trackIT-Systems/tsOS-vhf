@@ -1,4 +1,4 @@
-FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2027.0.1/tsOS-base-arm64-2027.0.1.zip"
+FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2027.0.3/tsOS-base-arm64-2027.0.3.zip"
 TO "tsOS-vhf-arm64.img"
 PUMP 500M
 
@@ -43,9 +43,10 @@ INSTALL .git/modules/usr/local/src/pyradiotracking /usr/local/src/pyradiotrackin
 RUN rm /usr/local/src/pyrtlsdr/.git
 INSTALL .git/modules/usr/local/src/pyrtlsdr /usr/local/src/pyrtlsdr/.git
 
-# Fix permissions for pi user
-RUN chown -R pi:pi /home/pi/
-RUN chown -R pi:pi /usr/local/src
+# Source trees are root-owned, like in tsOS-base
+RUN chown -R root:root /usr/local/src
+RUN chmod -R go-w /usr/local/src
+RUN sh -c 'for d in /usr/local/src/*/; do git config --system --add safe.directory "${d%/}"; done'
 
 #################################################
 ### services configuration
@@ -61,24 +62,21 @@ RUN make -j4
 RUN make install
 RUN ldconfig
 
-RUN apt-get install -y \
-    python3-pkg-resources \
-    python3-setuptools \
-    python3-flask \
-    python3-plotly
+# Remove the build toolchain again, keep the libusb runtime library
+RUN git -C /usr/local/src/librtlsdr clean -fdx
+RUN apt-mark manual libusb-1.0-0
+RUN apt-get purge -y --auto-remove build-essential cmake libusb-1.0-0-dev
 
-# Patch missing plotly.min.js 
-RUN mkdir -p /usr/lib/python3/dist-packages/plotly/package_data/
-RUN ln -s /usr/share/python3-plotly/plotly.js /usr/lib/python3/dist-packages/plotly/package_data/plotly.min.js
+RUN apt-get install -y \
+    python3-setuptools \
+    python3-numpy \
+    python3-scipy \
+    python3-schedule
 
 ENV PIP_ROOT_USER_ACTION ignore
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
 
 RUN python3 -m pip install --no-deps -e /usr/local/src/pyrtlsdr
-
-# Install radiotracking dependencies
-RUN apt install python3-importlib-metadata
-RUN python3 -m pip install --no-deps dash janus comm nest-asyncio retrying
 
 # Install radiotracking
 RUN python3 -m pip install --no-deps -e /usr/local/src/pyradiotracking
@@ -88,6 +86,7 @@ RUN systemctl enable radiotracking.service
 ### Cleanup image
 RUN rm -rf /var/lib/apt/lists/
 RUN apt-get clean
+RUN rm -rf /root/.cache/pip
 RUN find . -name "*.pyc" -exec rm -f {} \;
 
 ZERO
