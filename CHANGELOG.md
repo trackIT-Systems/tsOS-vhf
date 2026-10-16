@@ -18,7 +18,9 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 - `radiotracking.service` runs as `pi` in a systemd sandbox (`ProtectSystem=strict`, writes only to `/data`, USB devices allowed) instead of root, and starts `/usr/local/bin/radiotracking` by absolute path
 - usbfs memory limit is removed at boot via `/etc/tmpfiles.d/usbfs.conf` instead of in `radiotracking.service`
 - `radiotracking.service` requires the `/boot/firmware` and `/data` mounts and only starts if `/boot/firmware/radiotracking.ini` exists
-- `/usr/local/src` is root-owned (like in tsOS-base); the librtlsdr build toolchain is removed again after building
+- pyrtlsdr v0.5.0 (from v0.4.0)
+- `/usr/local/src` is root-owned (like in tsOS-base)
+- librtlsdr is installed from the release packages of the [trackIT-Systems/librtlsdr](https://github.com/trackIT-Systems/librtlsdr) fork (v0.9.1, pinned by checksum) instead of being built from a submodule in the image, so no build toolchain is installed any more. The library moves to `/usr/lib/aarch64-linux-gnu`, the `rtl_*` tools to `/usr/bin`, the udev rules to `/usr/lib/udev/rules.d`. The release adds a usbfs mmap workaround and a fix for hangs on USB transfer errors
 - Delta updates (pidiff) are only generated from releases at or after `DELTA_BASELINE`; pidiff pinned to v0.9.3
 
 ### Removed
@@ -27,6 +29,7 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 - vhf's own Caddyfile and the `/radiotracking/` route; the tsOS-base Caddyfile applies unchanged (the "VHF Signals" link in tsconfig no longer leads anywhere)
 - uhubctl status published to `<host>/radiotracking/log/csv` on radiotracking start
 - `wlan1.conf` boot-partition config and the optional `wlan1` extra Wi-Fi client it configured; no longer required
+- librtlsdr submodule (`/usr/local/src/librtlsdr`) and the librtlsdr build in the image
 - `/home/pi` helper files: `rtl_reflash.sh` with its `RTL2838UHIDIR.bin` EEPROM image, and the `relocate.py` lost+found recovery script
 
 ### Changed (via tsOS-base 2027.0.2–2027.0.3)

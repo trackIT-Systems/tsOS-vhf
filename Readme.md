@@ -13,7 +13,7 @@ The image is built on [tsOS-base](https://github.com/trackIT-Systems/tsOS-base) 
 On top of tsOS-base:
 
 - **[pyradiotracking](https://github.com/trackIT-Systems/pyradiotracking)** — RTL-SDR signal detection, matching, CSV/MQTT export
-- **[librtlsdr](https://github.com/librtlsdr/librtlsdr)** fork and **[pyrtlsdr](https://github.com/pyrtlsdr/pyrtlsdr)** — R802T gain stages and Python bindings
+- **[librtlsdr](https://github.com/trackIT-Systems/librtlsdr)** fork (installed from its release packages) and **[pyrtlsdr](https://github.com/pyrtlsdr/pyrtlsdr)** — R802T gain stages and Python bindings
 - **`radiotracking.service`** — runs as `pi` in a systemd sandbox, starts after time sync, `Nice=-10`, writes detections to `/data`
 
 Inherited from [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md): tsconfig, FileBrowser Quantum, Mosquitto, mqttutil, Chrony/gpsd, WittyPi (`tsschedule`), WireGuard, LTE helpers, overlayroot.
