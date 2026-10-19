@@ -1,4 +1,4 @@
-FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2027.0.3/tsOS-base-arm64-2027.0.3.zip"
+FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2027.0.4/tsOS-base-arm64-2027.0.4.zip"
 TO "tsOS-vhf-arm64.img"
 PUMP 500M
 
@@ -44,6 +44,16 @@ INSTALL .git/modules/usr/local/src/pyrtlsdr /usr/local/src/pyrtlsdr/.git
 RUN chown -R root:root /usr/local/src
 RUN chmod -R go-w /usr/local/src
 RUN sh -c 'for d in /usr/local/src/*/; do git config --system --add safe.directory "${d%/}"; done'
+
+# root's password is a build-time secret via TSOS_ROOT_PASSWORD, never
+# committed here.
+# Setting one also enables password SSH for root, which is key-only otherwise.
+# If unset, nothing is changed, so the root password of the base image survives.
+# The salt is fixed (16 chars, [A-Za-z0-9./]) so the same password gives the same hash.
+RUN sh -c 'if [ -n "$TSOS_ROOT_PASSWORD" ]; then \
+        echo "root:$(echo "$TSOS_ROOT_PASSWORD" | openssl passwd -6 -salt tsOSrootsalt0000 -stdin)" | chpasswd -e; \
+        sed -i "s/^PermitRootLogin .*/PermitRootLogin yes/" /etc/ssh/sshd_config.d/10-tsos.conf; \
+    fi'
 
 #################################################
 ### services configuration
