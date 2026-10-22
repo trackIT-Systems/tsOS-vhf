@@ -1,6 +1,3 @@
 *.img
 .cache/
 .vscode/
-
-docs/.sass-cache
-docs/_site

@@ -76,10 +76,8 @@ docker-compose run --rm pimod pimod.sh tsOS-vhf.Pifile
 
 ## Further reading
 
-- [Quickstart](docs/index.md) — flash, configure, first checks, SDR calibration
-- [Operation](docs/operation.md) — services, restarts, monitoring
-- [Troubleshooting](docs/troubleshooting.md)
-- [Common tasks](docs/tasks.md)
+- [Developer documentation](docs/README.md) — architecture, build, project structure
+- [Radiotracking](docs/radiotracking.md) — configuration, outputs, recovery, troubleshooting
 - [tsOS-base](https://github.com/trackIT-Systems/tsOS-base) — overlayroot, partitions, OTA, shared services
 - [CHANGELOG.md](CHANGELOG.md)
 
