@@ -1,4 +1,4 @@
-FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2027.0.4/tsOS-base-arm64-2027.0.4.zip"
+FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2027.0.6/tsOS-base-arm64-2027.0.6.zip"
 TO "tsOS-vhf-arm64.img"
 PUMP 500M
 

@@ -10,12 +10,12 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 
 ## [Unreleased]
 
-**Built on tsOS-base 2027.0.3, which changes the root/pi privilege model (see [tsOS-base docs/security.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/security.md)). This is a reflash boundary: no delta update is published into it, and every device is reinstalled.**
+**Built on tsOS-base 2027.0.6. Its 2027.0.3 changes the root/pi privilege model (see [tsOS-base docs/security.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/security.md)). This is a reflash boundary: no delta update is published into it, and every device is reinstalled.**
 
 ### Changed
 
-- Based on tsOS-base 2027.0.3 (from 2027.0.1)
-- radiotracking logs to the journal with a priority, `SYSLOG_IDENTIFIER=radiotracking` and the source location, following the [tsOS logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md), and logs nothing periodic above DEBUG; its warnings and errors reach `<host>/tsconfig/journal/radiotracking/<level>/…`. The docs show the bridge topics for them
+- Based on tsOS-base 2027.0.6 (from 2027.0.1)
+- radiotracking logs to the journal with a priority, `SYSLOG_IDENTIFIER=radiotracking` and the source location, following the [tsOS logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md), and logs nothing periodic above DEBUG; its warnings and errors reach `<host>/tsconfig/journal/radiotracking/<level>/…`. The docs show the bridge topics for them. A `schedule` entry in `radiotracking.ini` (tsconfig writes `schedule = ['']`) is ignored without a warning
 - `radiotracking.service` runs as `pi` in a systemd sandbox (`ProtectSystem=strict`, writes only to `/data`, USB devices allowed) instead of root, and starts `/usr/local/bin/radiotracking` by absolute path
 - usbfs memory limit is removed at boot via `/etc/tmpfiles.d/usbfs.conf` instead of in `radiotracking.service`
 - `radiotracking.service` requires the `/boot/firmware` and `/data` mounts and only starts if `/boot/firmware/radiotracking.ini` exists
@@ -33,7 +33,7 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 - librtlsdr submodule (`/usr/local/src/librtlsdr`) and the librtlsdr build in the image
 - `/home/pi` helper files: `rtl_reflash.sh` with its `RTL2838UHIDIR.bin` EEPROM image, and the `relocate.py` lost+found recovery script
 
-### Changed (via tsOS-base 2027.0.2–2027.0.3)
+### Changed (via tsOS-base 2027.0.2–2027.0.6)
 
 - Operator authentication: tsconfig and `/data` require a login with the `pi` password; `pi` has no `sudo` (polkit for allowed actions); `root` is reachable via SSH key only; `/boot/firmware` is root-owned
 - Optional HTTPS on port 443 with a per-device certificate
@@ -41,11 +41,18 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 - Hotspot is WPA2-only; Avahi publishes over IPv4 only
 - Huawei / Brovi E3372 sticks run in modem mode; Teltonika TRM200 and Quectel EC200A supported
 - WittyPi RTC driver installed prebuilt from `wittypi4` 0.2.0
+- mqttutil is replaced by tsconfig's telemetry daemon `tstelemetry`
+- Services log to the journal with priority, identifier and source location, and are quiet at the default level `WARNING` ([logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md))
+- `tsconfig.yml` is installed to `/etc/tsconfig` instead of the boot partition; the smartsolar and solarlife configs move to `/etc`
+- sshd reads pi's server keys from the boot partition instead of copying them
 
-### Added (via tsOS-base 2027.0.2–2027.0.3)
+### Added (via tsOS-base 2027.0.2–2027.0.6)
 
 - `smartsolar.service` (Victron SmartSolar) and `solarlife.service` (SolarLife MPPT) readout daemons
 - Per-install Bluetooth address
+- `tstelemetry` publishes journal entries per unit and level to `<host>/tsconfig/journal/<unit>/<level>/{csv,json,cbor}`, rate-limited, and counts to `<host>/tsconfig/journalstats/…`
+- Local MQTT broker over WebSockets at `/mqtt`, behind the login
+- tsconfig live dashboard, with the charge controller on the status page
 
 ## [2027.0.1] - 2026-09-23
 
