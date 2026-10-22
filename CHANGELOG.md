@@ -15,6 +15,7 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 ### Changed
 
 - Based on tsOS-base 2027.0.3 (from 2027.0.1)
+- radiotracking logs to the journal with a priority, `SYSLOG_IDENTIFIER=radiotracking` and the source location, following the [tsOS logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md), and logs nothing periodic above DEBUG; its warnings and errors reach `<host>/tsconfig/journal/radiotracking/<level>/…`. The docs show the bridge topics for them
 - `radiotracking.service` runs as `pi` in a systemd sandbox (`ProtectSystem=strict`, writes only to `/data`, USB devices allowed) instead of root, and starts `/usr/local/bin/radiotracking` by absolute path
 - usbfs memory limit is removed at boot via `/etc/tmpfiles.d/usbfs.conf` instead of in `radiotracking.service`
 - `radiotracking.service` requires the `/boot/firmware` and `/data` mounts and only starts if `/boot/firmware/radiotracking.ini` exists

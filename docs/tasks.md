@@ -53,14 +53,16 @@ Log files can either be accessed using the web interface ([http://169.254.0.1/sy
 
 ````
 pi@trackIT:~ $ journalctl -fu radiotracking
-Jun 15 16:39:59 trackIT systemd[1]: Started RadioTracking.
-Jun 15 16:40:07 trackIT bash[1410]: INFO:radiotracking:Starting all analyzers
-Jun 15 16:40:07 trackIT bash[1410]: INFO:radiotracking.analyze:Using '0' as device index.
-Jun 15 16:40:07 trackIT bash[1410]: INFO:radiotracking:SDR 0 CPU affinity: pid 1417's current affinity list: 0-3
-Jun 15 16:40:07 trackIT bash[1410]: INFO:radiotracking:SDR 0 CPU affinity: pid 1417's new affinity list: 0
-Jun 15 16:40:07 trackIT bash[1410]: INFO:radiotracking.analyze:Using '1' as device index.
+Jun 15 16:39:59 trackIT systemd[1]: Started radiotracking.service - Detect signals of wildlife tracking transmitters with RTL SDR devices.
+Jun 15 16:52:31 trackIT radiotracking[1417]: radiotracking.__main__: SDR 0 received last data 3.012 s ago, timed out
+Jun 15 16:52:31 trackIT radiotracking[1410]: radiotracking.__main__: Restarting SDR 0
 ...
-```
+````
 
 > Note: The option `-u radiotracking` specifies the radiotracking unit; option `-f` enables following logs, such that the stream of log messages is printed immediately; end the stream with `^C` (CTRL-C).
+
+radiotracking logs with a priority per message, following the [tsOS logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md). A working station logs nothing after its start:
+- `journalctl -u radiotracking -p warning` shows only warnings and worse.
+- `journalctl -u radiotracking -o verbose` also shows where a message was logged (`CODE_FILE`, `CODE_LINE`, `CODE_FUNC`).
+- For more detail, add `-v` (INFO) or `-vv` (DEBUG) to `ExecStart` temporarily with `systemctl edit radiotracking`.
 

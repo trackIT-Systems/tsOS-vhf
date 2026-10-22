@@ -36,6 +36,16 @@ There are multiple files containing the configuration of the station:
 
 3. MQTT Server: The MQTT server is configured the configuration files in the `mosquitto.d` directory. 
 > Note: For MQTT the same server configuration is reused for all stations, as only the server authenticates against the client. 
+> Note: Besides the signals, a bridge can forward the stations' log messages that *tsOS* publishes per service and severity ([tsOS logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md#forwarding-over-mqtt)). For example, to forward all signals plus warnings and worse of every service:
+> ```
+> topic +/radiotracking/# out 1
+> topic +/tsconfig/journal/+/emerg/cbor out 1
+> topic +/tsconfig/journal/+/alert/cbor out 1
+> topic +/tsconfig/journal/+/crit/cbor out 1
+> topic +/tsconfig/journal/+/err/cbor out 1
+> topic +/tsconfig/journal/+/warning/cbor out 1
+> topic +/tsconfig/journalstats/cbor out 1
+> ```
 
 4. Signal Detection: The signal detection algorithm's configuration can be adjusted in the `radiotracking.ini` file.
 > Note: This configuration file can also be adjusted using the RadioTracking Configuration WebUI ([http://169.254.0.1/radiotracking-config/](http://169.254.0.1/radiotracking-config/)).
