@@ -14,7 +14,7 @@
 - **Station name**: the hostname (`%H`, also the directory under `/data`), so topics and file names follow `systemd.hostname=` in `cmdline.txt`. Station names must be unique for a server to tell stations apart.
 - **Options on the command line override `radiotracking.ini`**: MQTT to the local broker, CSV files and the exported configuration under `/data` are always on.
 - **User**: `pi`, with a sandbox, see [Architecture](architecture.md#security). `Nice=-10`, so the analysis keeps up under load.
-- **Start conditions**: after `time-sync.target` (`Requires=`), `mosquitto.service` and `hostname-config.service`; only with the `/boot/firmware` and `/data` mounts; only if `/boot/firmware/radiotracking.ini` exists. tsOS-base's `chrony-wait.service` holds `time-sync.target` until chrony has synced, without a timeout. Signal times must be comparable between stations, so the service does not start with an unsynced clock.
+- **Start conditions**: after `time-sync.target` (`Requires=`), `mosquitto.service` and `hostname-config.service`; only with the `/boot/firmware` and `/data` mounts; only if `/boot/firmware/radiotracking.ini` exists. `time-sync.target` is reached only once the clock is set from a trusted source: chrony synced from NTP or GNSS (`chrony-wait.service`, without a timeout), or the RTC passed tsschedule's check. radiotracking is an observation service: signal times must be comparable between stations, so without a trusted clock the service does not start at all, and detections are never spooled or re-timed. Details: [tsOS-base docs/time.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/time.md).
 
 ## Configuration
 
@@ -127,7 +127,7 @@ Check the log for which SDR is restarted.
 
 ### The service does not start
 
-- **No time sync**: the service waits for `time-sync.target`. `chronyc tracking` shows whether chrony has synced. Without a network connection or GPS, check the cellular modem (`mmcli -L`, `nmcli device`) and the uplink (`ping -c4 8.8.8.8`).
+- **No time sync**: the service waits for `time-sync.target` (`systemctl list-jobs` shows it `waiting`). `chronyc tracking` shows whether chrony has synced, `journalctl -u tsschedule` why the RTC was not trusted. Without a network connection, check the cellular modem (`mmcli -L`, `nmcli device`) and the uplink (`ping -c4 8.8.8.8`), or take a GNSS fix under open sky (`tslocation fix`).
 - **No configuration**: `/boot/firmware/radiotracking.ini` must exist (`ConditionPathExists=`).
 - **No SDR found**: `rtl_test` lists the dongles. Stop the service first, a dongle can only be opened once.
 
