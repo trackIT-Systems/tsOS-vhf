@@ -1,0 +1,15 @@
+// tsOS-vhf's additions to tsOS-base's 20-tsos-systemctl.rules: lets `pi` start/stop/restart the
+// VHF image's services (what tsconfig's restart buttons do). Same split as there: only
+// org.freedesktop.systemd1.manage-units is granted, never manage-unit-files, so enable/disable/mask
+// stay denied. See tsOS-base docs/security.md, "Service control".
+const TSOS_VHF_MANAGED_UNITS = [
+    "radiotracking.service",
+];
+
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.systemd1.manage-units" &&
+        TSOS_VHF_MANAGED_UNITS.indexOf(action.lookup("unit")) != -1 &&
+        subject.user == "pi") {
+        return polkit.Result.YES;
+    }
+});
