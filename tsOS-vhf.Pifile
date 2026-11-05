@@ -1,4 +1,4 @@
-FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2027.0.6/tsOS-base-arm64-2027.0.6.zip"
+FROM "https://github.com/trackIT-Systems/tsOS-base/releases/download/2027.0.9/tsOS-base-arm64-2027.0.9.zip"
 TO "tsOS-vhf-arm64.img"
 PUMP 500M
 
@@ -84,6 +84,16 @@ RUN python3 -m pip install --no-deps -e /usr/local/src/pyrtlsdr
 # Install radiotracking
 RUN python3 -m pip install --no-deps -e /usr/local/src/pyradiotracking
 RUN systemctl enable radiotracking.service
+
+# Add radiotracking to tsOS-base's /etc/tsconfig/tsconfig.yml (root-owned, build-time); since 2027.0.9 the base
+# lists only its own services (`services:` is the last key of the file; make sure it ends with a newline first)
+RUN sh -c '[ -z "$(tail -c1 /etc/tsconfig/tsconfig.yml)" ] || echo >> /etc/tsconfig/tsconfig.yml'
+RUN tee -a /etc/tsconfig/tsconfig.yml <<EOF
+  - name: radiotracking
+    expert: false
+EOF
+# fail the build if tsOS-base starts listing it itself
+RUN python3 -c 'import yaml; n = [s["name"] for s in yaml.safe_load(open("/etc/tsconfig/tsconfig.yml"))["services"]]; assert len(n) == len(set(n)), n'
 
 #################################################
 ### Cleanup image
