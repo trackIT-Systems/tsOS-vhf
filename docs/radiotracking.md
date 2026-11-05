@@ -14,7 +14,8 @@
 - **Station name**: the hostname (`%H`, also the directory under `/data`), so topics and file names follow `systemd.hostname=` in `cmdline.txt`. Station names must be unique for a server to tell stations apart.
 - **Options on the command line override `radiotracking.ini`**: MQTT to the local broker, CSV files and the exported configuration under `/data` are always on.
 - **User**: `pi`, with a sandbox, see [Architecture](architecture.md#security). `Nice=-10`, so the analysis keeps up under load.
-- **Start conditions**: after `time-sync.target` (`Requires=`), `mosquitto.service` and `hostname-config.service`; only with the `/boot/firmware` and `/data` mounts; only if `/boot/firmware/radiotracking.ini` exists. `time-sync.target` is reached only once the clock is set from a trusted source: chrony synced from NTP or GNSS (`chrony-wait.service`, without a timeout), or the RTC passed tsschedule's check. radiotracking is an observation service: signal times must be comparable between stations, so without a trusted clock the service does not start at all, and detections are never spooled or re-timed. Details: [tsOS-base docs/time.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/time.md).
+- **Control**: `pi` and tsconfig may start, stop and restart the service (not enable, disable or mask it) through this image's polkit drop-in [25-tsos-vhf-systemctl.rules](../etc/polkit-1/rules.d/25-tsos-vhf-systemctl.rules). The Pifile adds it to tsconfig's service list (`/etc/tsconfig/tsconfig.yml`).
+- **Start conditions**: after `time-sync.target` (`Requires=`), `mosquitto.service` and `hostname-config.service`; only with the `/boot/firmware` and `/data` mounts; only if `/boot/firmware/radiotracking.ini` exists. `time-sync.target` is reached only once chrony has a trusted source (`chrony-wait.service`, without a timeout): NTP, GNSS, or the WittyPi RTC once it passed tsschedule's check (`refid RTC`, selected only while neither NTP nor GNSS is there). A WittyPi station without network and GNSS therefore starts radiotracking from its checked RTC, about 30 s after boot. radiotracking is an observation service: signal times must be comparable between stations, so without a trusted clock the service does not start at all, and detections are never spooled or re-timed. Details: [tsOS-base docs/time.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/time.md).
 
 ## Configuration
 
@@ -61,16 +62,23 @@ Published to the local broker as JSON, CSV and CBOR:
 | `<host>/radiotracking/device/<device>/<format>` | signals of one SDR |
 | `<host>/radiotracking/matched/<format>` | matched signals |
 | `<host>/radiotracking/calibrated/<format>` | matched signals in dBm |
-| `<host>/radiotracking/gain/<device>/<format>` | gain and dBm offset, retained |
+| `<host>/radiotracking/gain/<device>/<format>` | gain and dBm offset, at every SDR start |
 | `<host>/radiotracking/state/<format>` | SDR states |
 | `<host>/radiotracking/spectrum/<format>` | noise and SNR per frequency bin |
 
 tsconfig's live dashboard reads `device`, `matched` and `calibrated` over `/mqtt`.
 
-A bridge in `/boot/firmware/mosquitto.d` decides what leaves the station. Forwarding every signal plus warnings and worse of every service ([tsOS-base logging](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md#forwarding-over-mqtt)):
+Every record is published at QoS 1 (`--mqtt-qos`, default 1) and carries its `time`. Nothing is retained: the `gain` topic, retained by earlier images, is cleared by the first gain message of each SDR. Consumers sort by `time`, not by arrival, and accept duplicates ([tsOS-base MQTT](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/mqtt.md)).
+
+A second radiotracking instance on the station (e.g. for debugging) needs its own `--mqtt-client-id`, otherwise it takes over the session of the service.
+
+#### Bridge
+
+A bridge in `/boot/firmware/mosquitto.d` decides what leaves the station. Forward the matched signals and the SDR states as CBOR, as in [tsOS-base's bridge example](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/mqtt.md#bridge-settings), plus warnings and worse of every service ([tsOS-base logging](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md#forwarding-over-mqtt)):
 
 ```
-topic +/radiotracking/# out 1
+topic +/radiotracking/matched/cbor out 1
+topic +/radiotracking/state/cbor out 1
 topic +/tsconfig/journal/+/emerg/cbor out 1
 topic +/tsconfig/journal/+/alert/cbor out 1
 topic +/tsconfig/journal/+/crit/cbor out 1
@@ -79,9 +87,28 @@ topic +/tsconfig/journal/+/warning/cbor out 1
 topic +/tsconfig/journalstats/cbor out 1
 ```
 
-Over a cellular link, `+/radiotracking/+/cbor` and `+/radiotracking/+/+/cbor` carry the same data in its compact form.
+Add `+/radiotracking/calibrated/cbor` and `+/radiotracking/gain/+/cbor` for stations with `fullscale_dbm`. Do not forward `device/…` (every signal of every SDR, a multiple of `matched`) or `spectrum` (hundreds of values every 5 minutes), and only one format per topic: each topic line counts separately against the queue.
 
-A second radiotracking instance on the station (e.g. for debugging) needs its own `--mqtt-client-id`, otherwise it takes over the session of the service.
+#### Queue during an outage
+
+While the uplink is down, Mosquitto queues the bridge's QoS 1 messages, up to 100000 per client ([Queue limits](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/mqtt.md#queue-limits)). Beyond that, new messages are dropped; they are still in the CSV files under `/data`. How long the queue lasts depends on the rate radiotracking publishes on the forwarded topics. These are estimates from the configuration, not measurements:
+
+- `state`: a few records per SDR start and stop. Negligible on a running station.
+- `matched`: one record per received transmission, so the number of tags in range times their pulse rate. Tags typically pulse about once per second, so 10 tags in range give about 10 records per second.
+
+| `matched` records per second | e.g. | Outage covered by 100000 messages |
+| --- | --- | --- |
+| 1 | 1 tag in range | 28 hours |
+| 5 | 5 tags in range | 5.5 hours |
+| 10 | 10 tags in range | 2.8 hours |
+
+`journalctl -u mosquitto` shows `Outgoing messages are being dropped` once the queue is full.
+
+### Position
+
+radiotracking's records carry no position. The station's position comes from tsOS-base's `tslocation` ([Location](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/location.md)): `/etc/geolocation` is the effective position, the configured one or, in `mobile` mode, the current fix. For `mobile` stations (transects with a receiver), the server joins the `matched` records with tslocation's track (`<host>/tslocation/track/…`, `/data/<host>/tslocation/track/`) by `time`. Track points carry GNSS time, records radiotracking's trusted clock.
+
+Should radiotracking ever read a position itself, it reads `/run/tslocation/location.json` (watched with inotify, the file is replaced atomically), and the unit is ordered `After=tslocation.service`.
 
 ## Logging
 
@@ -127,7 +154,7 @@ Check the log for which SDR is restarted.
 
 ### The service does not start
 
-- **No time sync**: the service waits for `time-sync.target` (`systemctl list-jobs` shows it `waiting`). `chronyc tracking` shows whether chrony has synced, `journalctl -u tsschedule` why the RTC was not trusted. Without a network connection, check the cellular modem (`mmcli -L`, `nmcli device`) and the uplink (`ping -c4 8.8.8.8`), or take a GNSS fix under open sky (`tslocation fix`).
+- **No time sync**: the service waits for `time-sync.target` (`systemctl list-jobs` shows it `waiting`, and `chrony-wait.service` `running`). See tsOS-base's [A station without a trusted clock](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/time.md#a-station-without-a-trusted-clock): `chronyc sources` lists the sources chrony has (`RTC` for a checked WittyPi RTC), `journalctl -u tsschedule` why the RTC was not trusted. Without a network connection, check the cellular modem (`mmcli -L`, `nmcli device`) and the uplink (`ping -c4 8.8.8.8`), or take a GNSS fix under open sky (`tslocation fix`).
 - **No configuration**: `/boot/firmware/radiotracking.ini` must exist (`ConditionPathExists=`).
 - **No SDR found**: `rtl_test` lists the dongles. Stop the service first, a dongle can only be opened once.
 

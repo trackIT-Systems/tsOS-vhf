@@ -10,18 +10,21 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 
 ## [Unreleased]
 
-**Built on tsOS-base 2027.0.6. Its 2027.0.3 changes the root/pi privilege model (see [tsOS-base docs/security.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/security.md)). This is a reflash boundary: no delta update is published into it, and every device is reinstalled.**
+**Built on tsOS-base 2027.0.9. Its 2027.0.3 changes the root/pi privilege model (see [tsOS-base docs/security.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/security.md)). This is a reflash boundary: no delta update is published into it, and every device is reinstalled.**
 
 ### Changed
 
-- Based on tsOS-base 2027.0.6 (from 2027.0.1)
-- radiotracking logs to the journal with a priority, `SYSLOG_IDENTIFIER=radiotracking` and the source location, following the [tsOS logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md), and logs nothing periodic above DEBUG; its warnings and errors reach `<host>/tsconfig/journal/radiotracking/<level>/…`. The docs show the bridge topics for them. A `schedule` entry in `radiotracking.ini` (tsconfig writes `schedule = ['']`) is ignored without a warning
+- Based on tsOS-base 2027.0.9 (from 2027.0.1)
+- radiotracking logs to the journal through `python3-systemd`'s `JournalHandler` with a priority, `SYSLOG_IDENTIFIER=radiotracking` and the source location, following the [tsOS logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md), and logs nothing periodic above DEBUG; its warnings and errors reach `<host>/tsconfig/journal/radiotracking/<level>/…`. The docs show the bridge topics for them. A `schedule` entry in `radiotracking.ini` (tsconfig writes `schedule = ['']`) is ignored without a warning
 - `radiotracking.service` runs as `pi` in a systemd sandbox (`ProtectSystem=strict`, writes only to `/data`, USB devices allowed) instead of root, and starts `/usr/local/bin/radiotracking` by absolute path
 - usbfs memory limit is removed at boot via `/etc/tmpfiles.d/usbfs.conf` instead of in `radiotracking.service`
 - `radiotracking.service` requires the `/boot/firmware` and `/data` mounts and only starts if `/boot/firmware/radiotracking.ini` exists
 - pyrtlsdr v0.5.0 (from v0.4.0)
 - `/usr/local/src` is root-owned (like in tsOS-base)
 - librtlsdr is installed from the release packages of the [trackIT-Systems/librtlsdr](https://github.com/trackIT-Systems/librtlsdr) fork (v0.9.1, pinned by checksum) instead of being built from a submodule in the image, so no build toolchain is installed any more. The library moves to `/usr/lib/aarch64-linux-gnu`, the `rtl_*` tools to `/usr/bin`, the udev rules to `/usr/lib/udev/rules.d`. The release adds a usbfs mmap workaround and a fix for hangs on USB transfer errors
+- radiotracking publishes `<host>/radiotracking/gain/<device>/…` without the retain flag, as tsOS-base retains nothing: a consumer that stamps on arrival stored the retained message as new after every reconnect. The record carries its time. The first gain message of each SDR clears the topic retained by earlier images
+- `pi` and tsconfig control `radiotracking.service` through this image's polkit drop-in `25-tsos-vhf-systemctl.rules`, and the Pifile adds `radiotracking` to tsconfig's service list; tsOS-base 2027.0.9 lists neither any more
+- The docs recommend a bridge that forwards only `matched/cbor` and `state/cbor` of radiotracking, with the outage a full queue covers
 - Delta updates (pidiff) are only generated from releases at or after `DELTA_BASELINE`; pidiff pinned to v0.9.3
 
 ### Removed
@@ -33,7 +36,7 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 - librtlsdr submodule (`/usr/local/src/librtlsdr`) and the librtlsdr build in the image
 - `/home/pi` helper files: `rtl_reflash.sh` with its `RTL2838UHIDIR.bin` EEPROM image, and the `relocate.py` lost+found recovery script
 
-### Changed (via tsOS-base 2027.0.2–2027.0.6)
+### Changed (via tsOS-base 2027.0.2–2027.0.9)
 
 - Operator authentication: tsconfig and `/data` require a login with the `pi` password; `pi` has no `sudo` (polkit for allowed actions); `root` is reachable via SSH key only; `/boot/firmware` is root-owned
 - Optional HTTPS on port 443 with a per-device certificate
@@ -44,15 +47,30 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 - mqttutil is replaced by tsconfig's telemetry daemon `tstelemetry`
 - Services log to the journal with priority, identifier and source location, and are quiet at the default level `WARNING` ([logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md))
 - `tsconfig.yml` is installed to `/etc/tsconfig` instead of the boot partition; the smartsolar and solarlife configs move to `/etc`
+- One trusted clock: a clock is trusted once chrony has a source. The WittyPi RTC that passed tsschedule's check is one of chrony's sources (`refid RTC`, behind NTP and GNSS), so a station without network and GNSS reaches `time-sync.target` from its RTC and starts radiotracking ([time](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/time.md))
+- Mosquitto keeps the bridge's queue through outages and power cuts: up to 100000 QoS 1 messages per client, saved every 5 minutes ([MQTT](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/mqtt.md)). Station services publish at QoS 0 without a time and retain nothing
+- `/etc/geolocation` links to `/run/tslocation/geolocation`, the effective position from `tslocation`
+- No envsense sensors are configured by default; `tstelemetry` records the onboard temperatures
+- The polkit unit allowlist lists only tsOS-base's units, and tsconfig's default service list only its services
 - sshd reads pi's server keys from the boot partition instead of copying them
 
-### Added (via tsOS-base 2027.0.2–2027.0.6)
+### Added (via tsOS-base 2027.0.2–2027.0.9)
 
 - `smartsolar.service` (Victron SmartSolar) and `solarlife.service` (SolarLife MPPT) readout daemons
 - Per-install Bluetooth address
 - `tstelemetry` publishes journal entries per unit and level to `<host>/tsconfig/journal/<unit>/<level>/{csv,json,cbor}`, rate-limited, and counts to `<host>/tsconfig/journalstats/…`
 - Local MQTT broker over WebSockets at `/mqtt`, behind the login
 - tsconfig live dashboard, with the charge controller on the status page
+- Location service `tslocation` (tslocationd): measures the station's position (`/run/tslocation/location.json`), and records a GNSS-timed track in `mobile` mode to `<host>/tslocation/track/…` and `/data/<host>/tslocation/track/` ([location](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/location.md))
+- `python3-systemd`, through which tsOS services and radiotracking log to the journal
+
+### Fixed (via tsOS-base 2027.0.7–2027.0.9)
+
+- `hostname-config.service` runs at boot again (since 2026.9.1 it never started), so a station is named after `systemd.hostname=` in `cmdline.txt`, or `tsos-vhf-<serial>` while that is `tsos-default-name`, instead of `raspberrypi`. radiotracking uses the hostname as its station name in topics and file names
+- gpsd runs on stations with an LTE modem (the modem's NMEA port is added after `gpsd.socket`; gpsd runs read-only)
+- First boot no longer enables `caddy-api.service`, `systemd-networkd`, `nftables.service` and other units by Debian's presets
+- tsconfig no longer answers some requests with 502 after idle keep-alive connections
+- VE.Direct cables are matched by their USB strings, not every FTDI chip; the Raspberry Pi 4 hotspot drops WPA-PSK-SHA256
 
 ## [2027.0.1] - 2026-09-23
 

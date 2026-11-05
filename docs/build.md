@@ -30,7 +30,7 @@ tsOS-vhf is built in two stages: tsOS-base builds its image from Raspberry Pi OS
 4. **Git Submodules**: Installs the `.git` directories of `pyradiotracking` and `pyrtlsdr`
 5. **Permissions**: `/usr/local/src` root-owned, `git safe.directory` for each source tree
 6. **Root Password** (optional): `TSOS_ROOT_PASSWORD`, see below
-7. **Services**: librtlsdr packages, Python packages, `radiotracking.service`
+7. **Services**: librtlsdr packages, Python packages, `radiotracking.service`, and `radiotracking` appended to tsconfig's service list (`/etc/tsconfig/tsconfig.yml`)
 8. **Cleanup** (`ZERO`, `SHRINK`): Removes apt lists and caches, zero-fills unused space and shrinks the image
 
 ### Important Build Details
@@ -92,7 +92,8 @@ Add to the `RUN apt-get install` section in the Pifile.
 1. Add the service file to `etc/systemd/system/`
 2. Enable in Pifile: `RUN systemctl enable <service>.service`
 3. Run it as `pi` with a sandbox, like `radiotracking.service`
-4. To let `pi` control it, add it to tsOS-base's polkit allowlist (`20-tsos-systemctl.rules`)
+4. To let `pi` control it, add it to this image's polkit drop-in ([25-tsos-vhf-systemctl.rules](../etc/polkit-1/rules.d/25-tsos-vhf-systemctl.rules)); tsOS-base's `20-tsos-systemctl.rules` lists only the base's units
+5. To show it in tsconfig, append it to `/etc/tsconfig/tsconfig.yml` in the Pifile, next to `radiotracking`
 
 ### New Python Package
 

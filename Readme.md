@@ -16,15 +16,15 @@ On top of tsOS-base:
 - **[librtlsdr](https://github.com/trackIT-Systems/librtlsdr)** fork (installed from its release packages) and **[pyrtlsdr](https://github.com/pyrtlsdr/pyrtlsdr)** — R802T gain stages and Python bindings
 - **`radiotracking.service`** — runs as `pi` in a systemd sandbox, starts after time sync, `Nice=-10`, writes detections to `/data`
 
-Inherited from [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md): tsconfig, FileBrowser Quantum, Mosquitto, mqttutil, Chrony/gpsd, WittyPi (`tsschedule`), WireGuard, LTE helpers, overlayroot.
+Inherited from [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md): tsconfig, FileBrowser Quantum, Mosquitto, `tstelemetry`, Chrony/gpsd, `tslocation`, WittyPi (`tsschedule`), WireGuard, LTE helpers, overlayroot.
 
 ## Download and flash
 
-This release line is built on tsOS-base 2027.0.3 and changes the root/pi privilege model. Devices on earlier images have to be reflashed; no delta update is published into it.
+This release line is built on tsOS-base 2027.0.9 and changes the root/pi privilege model. Devices on earlier images have to be reflashed; no delta update is published into it.
 
 Images are published in [GitHub Releases](https://github.com/trackIT-Systems/tsOS-vhf/releases). Release notes live in [CHANGELOG.md](CHANGELOG.md).
 
-Flash with Raspberry Pi Imager or `dd`. Default hostname is `tsos-default-name` (set `systemd.hostname=` in [`cmdline.txt`](https://github.com/trackIT-Systems/tsOS-base/blob/main/boot/firmware/cmdline.txt) on the boot partition). For backend matching, use `<planner>-<project>-<number>`; each station name must be unique.
+Flash with Raspberry Pi Imager or `dd`. Default hostname is `tsos-default-name`, which names the station `tsos-vhf-<serial>` at boot (set `systemd.hostname=` in [`cmdline.txt`](https://github.com/trackIT-Systems/tsOS-base/blob/main/boot/firmware/cmdline.txt) on the boot partition). For backend matching, use `<planner>-<project>-<number>`; each station name must be unique.
 
 ## First access
 
@@ -42,12 +42,10 @@ Runtime settings live on the VFAT boot partition (`/boot/firmware` on the Pi). E
 | --- | --- |
 | `cmdline.txt` | `systemd.hostname=`, `timezone=`, first-boot `repartition` |
 | [`radiotracking.ini`](boot/firmware/radiotracking.ini) | pyradiotracking ([example](https://github.com/trackIT-Systems/pyradiotracking/blob/main/etc/radiotracking.ini)) |
-| `mqttutil.conf` | MQTT system reporting |
 | `mosquitto.d/` | Extra Mosquitto broker configs (`include_dir`) |
 | `wireguard.conf` | WireGuard interface |
-| `authorized_keys` | SSH keys copied to `pi` and `root` |
-| `tsconfig.yml` | tsconfig service config |
-| `geolocation` | Static GPS coordinates |
+| `authorized_keys` | SSH keys for `pi`, read in place by sshd |
+| `geolocation` | Configured station position, used by `tslocation` |
 
 Platform files other than `radiotracking.ini` come from tsOS-base. See that project's [boot configuration](https://github.com/trackIT-Systems/tsOS-base/blob/main/Readme.md#boot-configuration).
 
@@ -68,7 +66,7 @@ In tsconfig, saving and deploying configuration are separate actions — use **D
 
 ## Build
 
-Images are two-stage: a published [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/releases) zip (currently 2027.0.3), then this repo's Pifile via [pimod](https://github.com/Nature40/pimod) `v0.9.3` ([docker-compose.yml](docker-compose.yml)):
+Images are two-stage: a published [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/releases) zip (currently 2027.0.9), then this repo's Pifile via [pimod](https://github.com/Nature40/pimod) `v0.9.3` ([docker-compose.yml](docker-compose.yml)):
 
 ```sh
 docker-compose run --rm pimod pimod.sh tsOS-vhf.Pifile

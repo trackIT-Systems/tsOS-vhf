@@ -8,6 +8,8 @@ tsOS-vhf/
 │   └── firmware/
 │       └── radiotracking.ini       # radiotracking configuration (default)
 ├── etc/
+│   ├── polkit-1/rules.d/
+│   │   └── 25-tsos-vhf-systemctl.rules  # Lets pi restart radiotracking
 │   ├── systemd/system/
 │   │   └── radiotracking.service   # Signal detection service
 │   └── tmpfiles.d/
@@ -38,6 +40,7 @@ All other boot partition files (`cmdline.txt`, `mosquitto.d/`, `wireguard.conf`,
 
 ### `etc/`
 
+- `polkit-1/rules.d/25-tsos-vhf-systemctl.rules` - lets `pi` (and tsconfig) start, stop and restart `radiotracking.service`; tsOS-base's allowlist covers only the base's units
 - `systemd/system/radiotracking.service` - see [Radiotracking](radiotracking.md#service)
 - `tmpfiles.d/usbfs.conf` - sets `/sys/module/usbcore/parameters/usbfs_memory_mb` to `0` at boot
 

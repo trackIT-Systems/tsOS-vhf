@@ -2,7 +2,7 @@
 
 ## Base System
 
-Built on a released [tsOS-base](https://github.com/trackIT-Systems/tsOS-base) image (currently 2027.0.6, Raspberry Pi OS Lite, Debian Trixie), modified with [pimod](https://github.com/Nature40/pimod). tsOS-vhf adds the VHF signal detection and nothing else: the partition layout, overlayroot, network stack, web UI, MQTT broker, telemetry, logging, updates and the `root`/`pi` privilege model are tsOS-base's, see its [architecture](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/architecture.md).
+Built on a released [tsOS-base](https://github.com/trackIT-Systems/tsOS-base) image (currently 2027.0.9, Raspberry Pi OS Lite, Debian Trixie), modified with [pimod](https://github.com/Nature40/pimod). tsOS-vhf adds the VHF signal detection and nothing else: the partition layout, overlayroot, network stack, web UI, MQTT broker, telemetry, logging, updates and the `root`/`pi` privilege model are tsOS-base's, see its [architecture](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/architecture.md).
 
 ## Data Flow
 
@@ -34,7 +34,7 @@ Installed from git submodules under `/usr/local/src` with `pip install --no-deps
 
 - `radiotracking.service` - runs `/usr/local/bin/radiotracking` as `pi`, see [Radiotracking](radiotracking.md#service)
 
-The service is in tsOS-base's polkit allowlist, so `pi` (and tsconfig) can start, stop and restart it.
+tsOS-base's polkit allowlist lists only its own units (since 2027.0.9). tsOS-vhf allows `radiotracking.service` in its own drop-in, [25-tsos-vhf-systemctl.rules](../etc/polkit-1/rules.d/25-tsos-vhf-systemctl.rules), so `pi` (and tsconfig) can start, stop and restart it, but not enable, disable or mask it. The Pifile adds `radiotracking` to tsconfig's service list in `/etc/tsconfig/tsconfig.yml`, which tsOS-base no longer does either; the build fails if the base lists it again.
 
 ### Hardware Support
 
