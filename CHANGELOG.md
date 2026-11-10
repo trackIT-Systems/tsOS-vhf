@@ -10,11 +10,11 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 
 ## [Unreleased]
 
-**Built on tsOS-base 2027.0.9. Its 2027.0.3 changes the root/pi privilege model (see [tsOS-base docs/security.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/security.md)). This is a reflash boundary: no delta update is published into it, and every device is reinstalled.**
+**Built on tsOS-base 2027.0.10. Its 2027.0.3 changes the root/pi privilege model (see [tsOS-base docs/security.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/security.md)). This is a reflash boundary: no delta update is published into it, and every device is reinstalled.**
 
 ### Changed
 
-- Based on tsOS-base 2027.0.9 (from 2027.0.1)
+- Based on tsOS-base 2027.0.10 (from 2027.0.1)
 - radiotracking logs to the journal through `python3-systemd`'s `JournalHandler` with a priority, `SYSLOG_IDENTIFIER=radiotracking` and the source location, following the [tsOS logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md), and logs nothing periodic above DEBUG; its warnings and errors reach `<host>/tsconfig/journal/radiotracking/<level>/…`. The docs show the bridge topics for them. A `schedule` entry in `radiotracking.ini` (tsconfig writes `schedule = ['']`) is ignored without a warning
 - `radiotracking.service` runs as `pi` in a systemd sandbox (`ProtectSystem=strict`, writes only to `/data`, USB devices allowed) instead of root, and starts `/usr/local/bin/radiotracking` by absolute path
 - usbfs memory limit is removed at boot via `/etc/tmpfiles.d/usbfs.conf` instead of in `radiotracking.service`
@@ -30,13 +30,13 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 ### Removed
 
 - radiotracking web dashboard (`dashboard = False` in `radiotracking.ini`, no `--dashboard*` options), together with its Dash, Flask and plotly packages
-- vhf's own Caddyfile and the `/radiotracking/` route; the tsOS-base Caddyfile applies unchanged (the "VHF Signals" link in tsconfig no longer leads anywhere)
+- vhf's own Caddyfile and the `/radiotracking/` route; the tsOS-base Caddyfile applies unchanged
 - uhubctl status published to `<host>/radiotracking/log/csv` on radiotracking start
 - `wlan1.conf` boot-partition config and the optional `wlan1` extra Wi-Fi client it configured; no longer required
 - librtlsdr submodule (`/usr/local/src/librtlsdr`) and the librtlsdr build in the image
 - `/home/pi` helper files: `rtl_reflash.sh` with its `RTL2838UHIDIR.bin` EEPROM image, and the `relocate.py` lost+found recovery script
 
-### Changed (via tsOS-base 2027.0.2–2027.0.9)
+### Changed (via tsOS-base 2027.0.2–2027.0.10)
 
 - Operator authentication: tsconfig and `/data` require a login with the `pi` password; `pi` has no `sudo` (polkit for allowed actions); `root` is reachable via SSH key only; `/boot/firmware` is root-owned
 - Optional HTTPS on port 443 with a per-device certificate
@@ -53,8 +53,9 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 - No envsense sensors are configured by default; `tstelemetry` records the onboard temperatures
 - The polkit unit allowlist lists only tsOS-base's units, and tsconfig's default service list only its services
 - sshd reads pi's server keys from the boot partition instead of copying them
+- tsconfig shows the reset reason of the last boot on the status page, and `tstelemetry` publishes it (`rsts` collector)
 
-### Added (via tsOS-base 2027.0.2–2027.0.9)
+### Added (via tsOS-base 2027.0.2–2027.0.10)
 
 - `smartsolar.service` (Victron SmartSolar) and `solarlife.service` (SolarLife MPPT) readout daemons
 - Per-install Bluetooth address
@@ -63,9 +64,13 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 - tsconfig live dashboard, with the charge controller on the status page
 - Location service `tslocation` (tslocationd): measures the station's position (`/run/tslocation/location.json`), and records a GNSS-timed track in `mobile` mode to `<host>/tslocation/track/…` and `/data/<host>/tslocation/track/` ([location](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/location.md))
 - `python3-systemd`, through which tsOS services and radiotracking log to the journal
+- Kernel crash logs in `/data`: after a panic or oops, the end of the kernel log survives the reboot (ramoops) and is moved to `/data/<host>/pstore/` once the clock is trusted ([watchdog](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/watchdog.md#crash-logs))
+- Caddy imports route drop-ins from `/etc/caddy/tsos.d/*.caddy` into the shared site block; vhf ships none
 
-### Fixed (via tsOS-base 2027.0.7–2027.0.9)
+### Fixed (via tsOS-base 2027.0.7–2027.0.10)
 
+- A station that runs out of memory recovers instead of thrashing for hours: `systemd-oomd` (with `psi=1`) kills the unit whose memory pressure stays above 60% for 20 s, and systemd restarts it. radiotracking restarts after 60 s; 10 restarts within 15 minutes reboot the station ([memory](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/memory.md))
+- A kernel oops, storage that stops answering for 300 s (`hung_task_panic`) and an RCU stall now reboot the station through `panic=10`, instead of leaving it hung while systemd keeps feeding the watchdog ([watchdog](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/watchdog.md))
 - `hostname-config.service` runs at boot again (since 2026.9.1 it never started), so a station is named after `systemd.hostname=` in `cmdline.txt`, or `tsos-vhf-<serial>` while that is `tsos-default-name`, instead of `raspberrypi`. radiotracking uses the hostname as its station name in topics and file names
 - gpsd runs on stations with an LTE modem (the modem's NMEA port is added after `gpsd.socket`; gpsd runs read-only)
 - First boot no longer enables `caddy-api.service`, `systemd-networkd`, `nftables.service` and other units by Debian's presets

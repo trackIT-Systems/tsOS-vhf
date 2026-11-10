@@ -13,6 +13,6 @@ Technical documentation for developers working on tsOS-vhf. Everything tsOS-vhf 
 
 **Build**: `docker-compose run --rm pimod pimod.sh tsOS-vhf.Pifile`
 
-**Base**: [tsOS-base](https://github.com/trackIT-Systems/tsOS-base) 2027.0.9  
+**Base**: [tsOS-base](https://github.com/trackIT-Systems/tsOS-base), version set by `FROM` in [tsOS-vhf.Pifile](../tsOS-vhf.Pifile)  
 **Tool**: [pimod](https://github.com/Nature40/pimod) v0.9.3  
 **Architecture**: arm64

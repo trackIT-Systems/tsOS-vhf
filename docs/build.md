@@ -79,7 +79,7 @@ GitHub Actions builds on tag push ([.github/workflows/build.yml](../.github/work
 
 ### Delta Baseline
 
-`DELTA_BASELINE` in the workflow is the oldest release a delta update is generated from. tsOS-base 2027.0.2 changed the `root`/`pi` privilege model, so devices on earlier images are reflashed, and no delta crosses that boundary.
+`DELTA_BASELINE` in the workflow is the oldest release a delta update is generated from. Set it to the first release after a reflash boundary (e.g. a change of the `root`/`pi` privilege model in tsOS-base), so no delta crosses that boundary.
 
 ## Adding Components
 

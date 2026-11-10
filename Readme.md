@@ -20,7 +20,7 @@ Inherited from [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/blob/mai
 
 ## Download and flash
 
-This release line is built on tsOS-base 2027.0.9 and changes the root/pi privilege model. Devices on earlier images have to be reflashed; no delta update is published into it.
+This release line is built on tsOS-base 2027.0.10 and changes the root/pi privilege model. Devices on earlier images have to be reflashed; no delta update is published into it.
 
 Images are published in [GitHub Releases](https://github.com/trackIT-Systems/tsOS-vhf/releases). Release notes live in [CHANGELOG.md](CHANGELOG.md).
 
@@ -66,7 +66,7 @@ In tsconfig, saving and deploying configuration are separate actions — use **D
 
 ## Build
 
-Images are two-stage: a published [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/releases) zip (currently 2027.0.9), then this repo's Pifile via [pimod](https://github.com/Nature40/pimod) `v0.9.3` ([docker-compose.yml](docker-compose.yml)):
+Images are two-stage: a published [tsOS-base](https://github.com/trackIT-Systems/tsOS-base/releases) zip (currently 2027.0.10), then this repo's Pifile via [pimod](https://github.com/Nature40/pimod) `v0.9.3` ([docker-compose.yml](docker-compose.yml)):
 
 ```sh
 docker-compose run --rm pimod pimod.sh tsOS-vhf.Pifile
