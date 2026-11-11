@@ -48,7 +48,7 @@ SDRs of the same model differ in their attenuation, and a station with direction
 | `…-matched.csv` | matched signals: one transmission, with its power on each SDR |
 | `…-calibrated.csv` | matched signals in dBm (SDRs with `fullscale_dbm`) |
 | `…-gain.csv` | gain settings and dBW to dBm offset at every SDR start |
-| `…-state.csv` | SDR state changes |
+| `…-state.csv` | SDR state changes, and the levels of each SDR's band every `levels_interval_s` (300 s) |
 | `…-spectrum.csv` | noise level and SNR of every frequency bin, every `spectrum_interval_s` (300 s) |
 
 With `--export-config`, the configuration in effect is written next to them as `<host>_<start time>.ini`. With `calibrate = True`, every file name gets the suffix `_calibration` and nothing is published over MQTT. `/data` is reachable over FileBrowser, WebDAV and SFTP (tsOS-base).
@@ -63,7 +63,7 @@ Published to the local broker as JSON, CSV and CBOR:
 | `<host>/radiotracking/matched/<format>` | matched signals |
 | `<host>/radiotracking/calibrated/<format>` | matched signals in dBm |
 | `<host>/radiotracking/gain/<device>/<format>` | gain and dBm offset, at every SDR start |
-| `<host>/radiotracking/state/<format>` | SDR states |
+| `<host>/radiotracking/state/<format>` | SDR states, and the band levels (peak, RMS, noise, SNR) every `levels_interval_s` |
 | `<host>/radiotracking/spectrum/<format>` | noise and SNR per frequency bin |
 
 tsconfig's live dashboard reads `device`, `matched` and `calibrated` over `/mqtt`.
@@ -87,13 +87,13 @@ topic +/tsconfig/journal/+/warning/cbor out 1
 topic +/tsconfig/journalstats/cbor out 1
 ```
 
-Add `+/radiotracking/calibrated/cbor` and `+/radiotracking/gain/+/cbor` for stations with `fullscale_dbm`. Do not forward `device/…` (every signal of every SDR, a multiple of `matched`) or `spectrum` (hundreds of values every 5 minutes), and only one format per topic: each topic line counts separately against the queue.
+Add `+/radiotracking/calibrated/cbor` and `+/radiotracking/gain/+/cbor` for stations with `fullscale_dbm`. Do not forward `device/…` (every signal of every SDR, a multiple of `matched`) or `spectrum` (hundreds of values every 5 minutes; the band levels in `state` summarise it), and only one format per topic: each topic line counts separately against the queue.
 
 #### Queue during an outage
 
 While the uplink is down, Mosquitto queues the bridge's QoS 1 messages, up to 100000 per client ([Queue limits](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/mqtt.md#queue-limits)). Beyond that, new messages are dropped; they are still in the CSV files under `/data`. How long the queue lasts depends on the rate radiotracking publishes on the forwarded topics. These are estimates from the configuration, not measurements:
 
-- `state`: a few records per SDR start and stop. Negligible on a running station.
+- `state`: a few records per SDR start and stop, plus one record per SDR every `levels_interval_s` (300 s), about 1150 a day on a station with 4 SDRs. Negligible against `matched`.
 - `matched`: one record per received transmission, so the number of tags in range times their pulse rate. Tags typically pulse about once per second, so 10 tags in range give about 10 records per second.
 
 | `matched` records per second | e.g. | Outage covered by 100000 messages |

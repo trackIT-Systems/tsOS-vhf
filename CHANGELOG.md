@@ -15,6 +15,7 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 ### Changed
 
 - Based on tsOS-base 2027.0.10 (from 2027.0.1)
+- radiotracking sends the levels of each SDR's whole band in its state messages again, every `levels_interval_s` (300 s): peak, RMS, noise level and SNR (peak over noise). The per-bin spectrum stays optional and is not forwarded by the recommended bridge
 - radiotracking logs to the journal through `python3-systemd`'s `JournalHandler` with a priority, `SYSLOG_IDENTIFIER=radiotracking` and the source location, following the [tsOS logging convention](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/logging.md), and logs nothing periodic above DEBUG; its warnings and errors reach `<host>/tsconfig/journal/radiotracking/<level>/…`. The docs show the bridge topics for them. A `schedule` entry in `radiotracking.ini` (tsconfig writes `schedule = ['']`) is ignored without a warning
 - `radiotracking.service` runs as `pi` in a systemd sandbox (`ProtectSystem=strict`, writes only to `/data`, USB devices allowed) instead of root, and starts `/usr/local/bin/radiotracking` by absolute path
 - usbfs memory limit is removed at boot via `/etc/tmpfiles.d/usbfs.conf` instead of in `radiotracking.service`
