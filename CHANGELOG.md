@@ -13,6 +13,7 @@ This repository was previously published as **tRackIT OS** (and, for a period, a
 **Built on tsOS-base 2027.0.10. Its 2027.0.3 changes the root/pi privilege model (see [tsOS-base docs/security.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/security.md)). This is a reflash boundary: no delta update is published into it, and every device is reinstalled.**
 
 ### Changed
+- `radiotracking` runs only while `/data` is mounted: it starts when the data volume appears (`datafs`, or a USB disk that devmon bind-mounts) and stop when it goes away (`BindsTo=data.mount`, `WantedBy=data.mount`). Without a data volume it doesn't start, so nothing is written into the root overlay. See tsOS-base [docs/architecture.md](https://github.com/trackIT-Systems/tsOS-base/blob/main/docs/architecture.md#without-a-data-volume)
 
 - Based on tsOS-base 2027.0.10 (from 2027.0.1)
 - radiotracking sends the levels of each SDR's whole band in its state messages again, every `levels_interval_s` (300 s): peak, RMS, noise level and SNR (peak over noise). The per-bin spectrum stays optional and is not forwarded by the recommended bridge

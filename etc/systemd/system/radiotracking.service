@@ -2,7 +2,11 @@
 Description=Detect signals of wildlife tracking transmitters with RTL SDR devices
 After=network.target mosquitto.service time-sync.target hostname-config.service
 Requires=time-sync.target
+# Records to /data: runs only while the data volume (datafs or a USB disk that devmon
+# bind-mounts) is mounted, so nothing is written into the root overlay. BindsTo stops it when
+# the volume goes away, WantedBy=data.mount starts it when it appears (tsOS-base docs/architecture.md)
 RequiresMountsFor=/boot/firmware /data
+BindsTo=data.mount
 ConditionPathExists=/boot/firmware/radiotracking.ini
 
 # Reboot after more than 10 restarts in 15 minutes happened.
@@ -40,4 +44,4 @@ LockPersonality=yes
 SystemCallArchitectures=native
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target data.mount
